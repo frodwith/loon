@@ -1,19 +1,18 @@
 /+  punk
 =~
 ::  the lambda-delta calculus is an augmentation of the untyped lambda calculus.
-::  we start with abstraction and application (lamb/appl/lamv), and we add:
+::  we start with abstraction and application (lamb/appl), and we add:
 ::    nouns (cons,1,3,4,5,10)
 ::    let (8 - the subject is a list of bound values)
 ::    if-then-else (6)
 ::    hints (11)
-::    delta abstraction and application (quasiquotes lambdas, delt/appd/delv)
+::    delta abstraction and application (quasiquotes lambdas, delt/appd)
 ::  we compile to nock through punk, the quasiquote-nock.
 |%
 +$  user
-  $~  [%lamv %a]
-  $^  [p=user q=user]
-  $%  [%lamv nam=@t]
-      [%delv nam=@t]
+  $~  %a
+  $@  @t
+  $%  [%cons p=user q=user]
       [%frag axe=@ of=user]
       [%edit axe=@ tgt=user val=user]
       [%quot val=*]
@@ -29,7 +28,7 @@
       [%sint tag=@ exp=user]
       [%dint tag=@ clu=user exp=user]
   ==
-+$  core  :: just user with de bruijn indices instead of names
++$  core
   $~  [%lamv 0]
   $^  [p=core q=core]
   $%  [%lamv inx=@]
@@ -49,24 +48,34 @@
       [%sint tag=@ exp=core]
       [%dint tag=@ clu=core exp=core]
   ==
++$  bind
+  $@  @ud  ::  lambda
+  [~ @ud]  ::  delta
++$  env
+  (map @t bind)
 --
 |%
 ++  extend
-  |=  [nam=@ env=(map @t @)]
-  %.  [nam 0]
+  |=  [nam=@ =env lam=?]
+  %.  :-  nam
+      ?:(lam 0 [~ 0])
   %~  put  by
   %-  ~(run by env)
-  |=  a=@
-  +(a)
+  |=  a=bind
+  ?@  a
+    ?:(lam +(a) a)
+  ?:(lam a `+.a)
 ++  user-compile
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
-  =|  [den=(map @t @) env=(map @t @)]
+  =|  =env
   |-  ^-  core
+  ?@  e
+    =/  b  (~(got by env) e)
+    ?@  b  [%lamv b]
+    [%delv +.b]
   ?-  -.e
-    ^      [$(e p.e) $(e q.e)]
-    %lamv  [%lamv (~(got by env) nam.e)]
-    %delv  [%delv (~(got by den) nam.e)]
+    %cons  [$(e p.e) $(e q.e)]
     %frag  [%frag axe.e $(e of.e)]
     %edit  [%edit axe.e $(e tgt.e) $(e val.e)]
     %quot  e
@@ -74,10 +83,10 @@
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, env (extend nam.e env))]
-    %lamb  [%lamb $(e bod.e, env (extend arg.e env))]
+    %letn  [%letn $(e val.e) $(e in.e, env (extend nam.e env &))]
+    %lamb  [%lamb $(e bod.e, env (extend arg.e env &))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, den (extend arg.e den))]
+    %delt  [%delt $(e bod.e, env (extend arg.e env |))]
     %appd  [%appd $(e del.e) $(e arg.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
@@ -120,7 +129,11 @@
   e
 --
 :-  %say
-|=  [^ ~ ~]
+|=  [^ [exp=user ~] ~]
 :-  %noun
-(compile %appl [%lamb %a %lamv %a] %quot 42)
+?>  .=  42
+    .*  ~  (compile %appl [%lamb %a %a] %quot 42)
+=/  fol=*  (compile exp)
+~&  fol
+.*  ~  fol
 ==
