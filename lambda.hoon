@@ -42,10 +42,9 @@
       [%dint tag=@ clu=user exp=user]
   ==
 +$  core
-  $~  [%lamv 0]
+  $~  [%name 0 0]
   $^  [p=core q=core]
-  $%  [%lamv inx=@]
-      [%delv inx=@]
+  $%  [%name dex=@ lex=@]
       [%frag axe=@ of=core]
       [%edit axe=@ tgt=core val=core]
       [%quot val=*]
@@ -62,8 +61,7 @@
       [%dint tag=@ clu=core exp=core]
   ==
 +$  bind
-  $@  @ud  ::  lambda
-  [~ @ud]  ::  delta
+  [del=@ lam=@]
 +$  env
   (map @t bind)
 --
@@ -91,7 +89,7 @@
   |=  in=tape
   =|  [i=@ st=toke-state out=(list token)]
   |-  ^+  out
-  ?~  in  (flop out)
+  ?~  in  (flop (tok-fin st out))
   =+  [c at]=[i.in i]
   =>  .(in t.in, i +(i))
   ?:  =('(' c)
@@ -214,25 +212,29 @@
       [%dint +.tag $(e &3.l) $(e &4.l)]
     ==
   ==
-++  extend
-  |=  [nam=@ =env lam=?]
-  %.  :-  nam
-      ?:(lam 0 [~ 0])
+++  bind-del
+  |=  [nam=@ =env]
+  %.  [nam 0 0]
   %~  put  by
   %-  ~(run by env)
   |=  a=bind
-  ?@  a
-    ?:(lam +(a) a)
-  ?:(lam a `+.a)
-++  user-compile
+  a(del +(del.a))
+++  bind-lam
+  |=  [nam=@ =env]
+  %.  [nam 0 1]
+  %~  put  by
+  %-  ~(run by env)
+  |=  a=bind
+  ?.  =(0 del.a)  a
+  ?:  =(0 lam.a)  a
+  a(lam +(lam.a))
+++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
   =|  =env
   |-  ^-  core
   ?@  e
-    =/  b  (~(got by env) e)
-    ?@  b  [%lamv b]
-    [%delv +.b]
+    name+(~(got by env) e)
   ?-  -.e
     %cons  [$(e p.e) $(e q.e)]
     %frag  [%frag axe.e $(e of.e)]
@@ -242,28 +244,32 @@
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, env (extend nam.e env &))]
-    %lamb  [%lamb $(e bod.e, env (extend arg.e env &))]
+    %letn  [%letn $(e val.e) $(e in.e, env (bind-lam nam.e env))]
+    %lamb  [%lamb $(e bod.e, env (bind-lam arg.e env))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, env (extend arg.e env |))]
+    %delt  [%delt $(e bod.e, env (bind-del arg.e env))]
     %appd  [%appd $(e del.e) $(e arg.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
   ==
-++  core-compile
+++  core-to-punk
   |=  e=core
   ::  =-  ~&  [%core exp=e pro=-]  -
   ^-  *  ::  punk
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
-           ::  subject is a list of bound values
-           ::  i+1 1s (tails) followed by a head (0)
-    %lamv  0+(lsh [0 1] (dec (lsh [0 +(inx.e)] 1)))
-    %delv  =|  i=@
+    %name  =/  f=*
+             :-  0
+             ?:  =(0 lex.e)  1  :: the backquote subject
+             ::  subject is a list of bound values
+             ::  lex 1s (tails) followed by a head (0)
+             (lsh [0 1] (dec (lsh [0 lex.e] 1)))
+           ?:  =(0 dex.e)  f
+           :-  1
+           =|  i=@
            |-  ^-  *
-           :-  ','
-           ?:  =(i inx.e)  [0 1]
-           $(i +(i))
+           ?:  =(i dex.e)  f
+           $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
     %edit  [10 [axe.e $(e tgt.e)] $(e val.e)]
     %quot  [1 val.e]
@@ -274,26 +280,39 @@
     %letn  [8 $(e val.e) $(e in.e)]
     %lamb  [[1 $(e bod.e)] 0 1]
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
-    %delt  [1 '`' $(e bod.e)]
+    %delt  ['`' $(e bod.e)]
     %appd  [2 $(e arg.e) $(e del.e)]
     %sint  [11 tag.e $(e exp.e)]
     %dint  [11 [tag.e $(e clu.e)] $(e exp.e)]
   ==
-++  compile
+++  user-to-nock
   |=  e=user
   %-  compile:punk
-  %-  core-compile
-  %-  user-compile
+  %-  core-to-punk
+  %-  user-to-core
   e
+++  tape-to-user
+  |=  t=tape
+  %-  parse
+  %-  read
+  %-  tokenize
+  t
+++  run-tape
+  |=  t=tape
+  .*  ~  ::  the "default environment" is "empty"
+  %-  user-to-nock
+  %-  tape-to-user
+  t
 --
 :-  %say
 |=  [^ [pgm=tape ~] ~]
 :-  %noun
 ?>  .=  42
-    .*  ~  (compile %appl [%lamb %a %a] %quot 42)
+    .*  ~  (user-to-nock %appl [%lamb %a %a] %quot 42)
 ?>  .=  42
     (lsdectape "24")
-=/  nock  (compile (parse (read (tokenize pgm))))
-~&  ~(ram re (sell !>(nock)))
-.*  ~  nock
+?>  .=  [42 63]
+    .*  63
+    (run-tape "(let x 42 (dfn y (cons x y)))")
+(run-tape pgm)
 ==
