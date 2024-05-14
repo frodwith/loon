@@ -96,7 +96,7 @@
     $(out [%'(' (tok-fin st out)], st ~)
   ?:  =(')' c)
     $(out [%')' (tok-fin st out)], st ~)
-  ?:  =(' ' c)
+  ?:  |(=(' ' c) =('\0a' c))
     $(out (tok-fin st out), st ~)
   ?:  &((gte c 'a') (lte c 'z'))
     ?@  st  $(st [%sym c ~])
@@ -297,22 +297,54 @@
   %-  read
   %-  tokenize
   t
-++  run-tape
+++  compile-tape
   |=  t=tape
-  .*  ~  ::  the "default environment" is "empty"
   %-  user-to-nock
   %-  tape-to-user
   t
+++  run-tape
+  |=  t=tape
+  .*  ~  ::  the "default environment" is "empty"
+  (compile-tape t)
+++  cram
+  |=  v=vase
+  ~(ram re (sell v))
+++  run-slog
+  |=  t=tape
+  =/  u=user  (tape-to-user t)
+  ~&  user=(cram !>(u))
+  =/  n=*  (user-to-nock u)
+  ~&  nock=(cram !>(n))
+  .*(~ n)
 --
+=/  cmd
+  $@  %test
+  $%  [%eval tape]
+      [%load path]
+  ==
 :-  %say
-|=  [^ [pgm=tape ~] ~]
+|=  [^ [=cmd ~] ~]
 :-  %noun
-?>  .=  42
-    .*  ~  (user-to-nock %appl [%lamb %a %a] %quot 42)
-?>  .=  42
-    (lsdectape "24")
-?>  .=  [42 63]
-    .*  63
-    (run-tape "(let x 42 (dfn y (cons x y)))")
-(run-tape pgm)
+?@  cmd
+  ?>  .=  42
+      .*  ~  (user-to-nock %appl [%lamb %a %a] %quot 42)
+  ?>  .=  42
+      (lsdectape "24")
+  ?>  .=  [42 63]  :: dfns can close over lexicals
+      .*  63
+      (run-tape "(let x 42 (dfn y (cons x y)))")
+  ?>  .=  [42 63]  :: dfns can close over dexicals
+      %-  run-tape
+      "(dcall (dcall (dfn x (dfn y (cons x y))) 42) 63)"
+  ?>  .=  42       ::  decrement
+      %-  run-tape
+      "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
+  %ok
+?-  -.cmd
+  %eval  (run-tape +.cmd)
+  %load  =/  w=wain  .^(wain %cx +.cmd)
+         =/  c=cord  (of-wain:format w)
+         =/  t=tape  (trip c)
+         (run-tape t)
+==
 ==
