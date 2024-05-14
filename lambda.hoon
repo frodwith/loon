@@ -28,7 +28,7 @@
   $%  [%cons p=user q=user]
       [%frag axe=@ of=user]
       [%edit axe=@ tgt=user val=user]
-      [%quot val=*]
+      [%litn val=*]
       [%bump atm=user]
       [%deep val=user]
       [%same a=user b=user]
@@ -47,7 +47,7 @@
   $%  [%name dex=@ lex=@]
       [%frag axe=@ of=core]
       [%edit axe=@ tgt=core val=core]
-      [%quot val=*]
+      [%litn val=*]
       [%deep val=core]
       [%bump atm=core]
       [%same a=core b=core]
@@ -133,7 +133,7 @@
 ++  parse
   |=  e=sexp
   ^-  user
-  ?@  e  quot+e
+  ?@  e  litn+e
   ?-  -.e
     %sym  +.e
     %list
@@ -158,18 +158,23 @@
       =/  axe  &2.l
       ?>  ?=(@ axe)
       [%edit axe $(e &3.l) $(e &4.l)]
-        %quote
-      :-  %quot
-      =*  n  +.l
-      ?@  n  n
-      ?>  ?=(%list -.n)
-      =*  m  +.n
-      ?<  ?=(~ m)
-      ?<  ?=(~ +.m)
-      =/  o=(lest sexp)  m
-      |-  ^-  *
-      ?~  t.o  i.o
-      [i.o $(o t.o)]
+        %lit
+      :-  %litn
+      =-  (litl +.l)
+      |%
+      ++  one
+        |=  e=sexp
+        ^-  *
+        ?@  e  e
+        ?:  ?=(%sym -.e)  ~|("symbol in literal" !!)
+        (litl +.e)
+      ++  litl
+        |=  es=(list sexp)
+        ^-  *
+        ?~  es    ~|("nullary sexp list" !!)
+        ?~  t.es  (one i.es)
+        [(one i.es) $(es t.es)]
+      --
         %bump
       ?>  =(2 (lent l))
       [%bump $(e &2.l)]
@@ -239,7 +244,7 @@
     %cons  [$(e p.e) $(e q.e)]
     %frag  [%frag axe.e $(e of.e)]
     %edit  [%edit axe.e $(e tgt.e) $(e val.e)]
-    %quot  e
+    %litn  e
     %bump  [%bump $(e atm.e)]
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
@@ -272,7 +277,7 @@
            $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
     %edit  [10 [axe.e $(e tgt.e)] $(e val.e)]
-    %quot  [1 val.e]
+    %litn  [1 val.e]
     %deep  [3 $(e val.e)]
     %bump  [4 $(e atm.e)]
     %same  [5 $(e a.e) $(e b.e)]
@@ -325,9 +330,10 @@
 :-  %say
 |=  [^ [=cmd ~] ~]
 :-  %noun
-?@  cmd
+?-  cmd
+    %test
   ?>  .=  42
-      .*  ~  (user-to-nock %appl [%lamb %a %a] %quot 42)
+      .*  ~  (user-to-nock %appl [%lamb %a %a] %litn 42)
   ?>  .=  42
       (lsdectape "24")
   ?>  .=  [42 63]  :: dfns can close over lexicals
@@ -336,15 +342,20 @@
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
       "(dcall (dcall (dfn x (dfn y (cons x y))) 42) 63)"
+  ?>  .=  [40 2]   (run-tape "(lit 40 2)")
+  ?>  .=  [40 2]   (run-tape "(lit (40 2))")
+  ?>  .=  42       (run-tape "(lit 42)")
+  ?>  .=  42       (run-tape "(lit (42))")
   ?>  .=  42       ::  decrement
       %-  run-tape
       "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
   %ok
-?-  -.cmd
-  %eval  (run-tape +.cmd)
-  %load  =/  w=wain  .^(wain %cx +.cmd)
-         =/  c=cord  (of-wain:format w)
-         =/  t=tape  (trip c)
-         (run-tape t)
+    [%eval *]
+  (run-tape +.cmd)
+    [%load *]
+  =/  w=wain  .^(wain %cx +.cmd)
+  =/  c=cord  (of-wain:format w)
+  =/  t=tape  (trip c)
+  (run-tape t)
 ==
 ==
