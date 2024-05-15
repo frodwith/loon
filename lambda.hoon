@@ -37,6 +37,9 @@
 +$  fund  $@(~ fond)
 +$  path  $@(~ [del=@ f=fond])
 +$  env   (list subj)
++$  raph
+  $^  [p=raph q=raph]
+  [~ nam=@t exp=user]
 +$  user
   $~  %a
   $@  @t
@@ -49,6 +52,7 @@
       [%same a=user b=user]
       [%cond t=user y=user n=user]
       [%letn nam=neet val=user in=user]
+      [%letr g=raph in=user]
       [%lamb arg=neet bod=user]
       [%appl lam=user arg=user]
       [%delt arg=neet bod=user]
@@ -68,6 +72,7 @@
       [%same a=core b=core]
       [%cond t=core y=core n=core]
       [%letn val=core in=core]
+      [%letr rec=core in=core]
       [%lamb bod=core]
       [%appl lam=core arg=core]
       [%delt bod=core]
@@ -294,6 +299,14 @@
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
     %letn  [%letn $(e val.e) $(e in.e, env (bind-lam nam.e env))]
+    %letr  =+  =/  rap  g.e
+               |-  ^-  [n=neet u=user]
+               ?~  -.rap  +.rap
+               =/  l  $(rap p.rap)
+               =/  r  $(rap q.rap)
+               [[n.l n.r] %cons u.l u.r]
+           =.  env  [rec+n env]
+           [%letr $(e u) $(e in.e)]
     %lamb  [%lamb $(e bod.e, env (bind-lam arg.e env))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
     %delt  [%delt $(e bod.e, env [(neet-subj arg.e) env])]
@@ -324,6 +337,7 @@
     %same  [5 $(e a.e) $(e b.e)]
     %cond  [6 $(e t.e) $(e y.e) $(e n.e)]
     %letn  [8 $(e val.e) $(e in.e)]
+    %letr  [8 [1 $(e rec.e)] $(e in.e)]
     %lamb  [[1 $(e bod.e)] 0 1]
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
