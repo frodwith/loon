@@ -113,6 +113,9 @@
     ==
   ~|("unexpected character '{<c>}' at char {<i>}." !!)
 ++  read
+  |=  in=tape
+  (read-tokens (tokenize in))
+++  read-tokens
   |=  in=(list token)
   =|  stk=(lest (list sexp))
   |-  ^-  sexp
@@ -130,6 +133,19 @@
               $(stk [[[%list (flop i.stk)] i.t.stk] t.t.stk])
     [%sym *]  $(stk [[[%sym +.t] i.stk] t.stk])
     [%num *]  $(stk [[+.t i.stk] t.stk])
+  ==
+++  parse-neet
+  |=  e=sexp
+  ^-  neet
+  ?@  e  ~|("number in binding tree {<e>}" !!)
+  ?-  -.e
+    %sym   +.e
+    %list  ?~  +.e  ~|("empty binding tree" !!)
+           =/  l=(lest sexp)  +.e
+           |-  ^-  neet
+           =/  h  ^$(e i.l)
+           ?~  t.l  h
+           [h $(l t.l)]
   ==
 ++  parse
   |=  e=sexp
@@ -190,21 +206,18 @@
         %let
       ?>  =(4 (lent l))
       =/  nam  &2.l
-      ?>  ?=([%sym *] nam)
-      [%letn +.nam $(e &3.l) $(e &4.l)]
+      [%letn (parse-neet nam) $(e &3.l) $(e &4.l)]
         %dcall
       ?>  =(3 (lent l))
       [%appd $(e &2.l) $(e &3.l)]
         %fn
       ?>  =(3 (lent l))
       =/  arg  &2.l
-      ?>  ?=([%sym *] arg)
-      [%lamb +.arg $(e &3.l)]
+      [%lamb (parse-neet arg) $(e &3.l)]
         %dfn
       ?>  =(3 (lent l))
       =/  arg  &2.l
-      ?>  ?=([%sym *] arg)
-      [%delt +.arg $(e &3.l)]
+      [%delt (parse-neet arg) $(e &3.l)]
         %sint
       ?>  =(3 (lent l))
       =/  tag  &2.l
@@ -302,7 +315,6 @@
   |=  t=tape
   %-  parse
   %-  read
-  %-  tokenize
   t
 ++  compile-tape
   |=  t=tape
@@ -348,15 +360,23 @@
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
       "(dcall (dcall (dfn x (dfn y (cons x y))) 42) 63)"
-  ~|  t+4
+  ~|  t+'neet parse'
+  ?>  .=  %x            (parse-neet (read "x"))
+  ?>  .=  %x            (parse-neet (read "(x)"))
+  ?>  .=  [%x %y]       (parse-neet (read "(x y)"))
+  ?>  .=  [%x %y %z]    (parse-neet (read "(x y z)"))
+  ?>  .=  [[%x %y] %z]  (parse-neet (read "((x y) z)"))
+  ~|  t+%fst
+  ?>  .=  40       (run-tape "((fn (x y) x) (cons 40 2))")
+  ~|  t+%snd
+  ?>  .=  2        (run-tape "((fn (x y) y) (cons 40 2))")
+  ~|  t+'destructuring let'
+  ?>  .=  5        (run-tape "(let (x y z) (lit 3 4 5) z)")
+  ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
-  ~|  t+5
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
-  ~|  t+6
   ?>  .=  42       (run-tape "(lit 42)")
-  ~|  t+7
   ?>  .=  42       (run-tape "(lit 42)")
-  ~|  t+8
   ?>  .=  42       (run-tape "(lit (42))")
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
