@@ -22,6 +22,11 @@
 +$  toke-state
   $@  ~
   [?(%sym %num) (list @t)]
++$  neet
+  $@  @t
+  [p=neet q=neet]
++$  env
+  (list neet)
 +$  user
   $~  %a
   $@  @t
@@ -33,10 +38,10 @@
       [%deep val=user]
       [%same a=user b=user]
       [%cond t=user y=user n=user]
-      [%letn nam=@t val=user in=user]
-      [%lamb arg=@t bod=user]
+      [%letn nam=neet val=user in=user]
+      [%lamb arg=neet bod=user]
       [%appl lam=user arg=user]
-      [%delt arg=@t bod=user]
+      [%delt arg=neet bod=user]
       [%appd del=user arg=user]
       [%sint tag=@ exp=user]
       [%dint tag=@ clu=user exp=user]
@@ -44,7 +49,7 @@
 +$  core
   $~  [%name 0 0]
   $^  [p=core q=core]
-  $%  [%name dex=@ lex=@]
+  $%  [%name dex=@ axe=@]
       [%frag axe=@ of=core]
       [%edit axe=@ tgt=core val=core]
       [%litn val=*]
@@ -60,10 +65,6 @@
       [%sint tag=@ exp=core]
       [%dint tag=@ clu=core exp=core]
   ==
-+$  bind
-  [del=@ lam=@]
-+$  env
-  (map @t bind)
 --
 |%
 ++  lsdectape
@@ -169,11 +170,10 @@
         ?:  ?=(%sym -.e)  ~|("symbol in literal" !!)
         (litl +.e)
       ++  litl
-        |=  es=(list sexp)
-        ^-  *
-        ?~  es    ~|("nullary sexp list" !!)
-        ?~  t.es  (one i.es)
-        [(one i.es) $(es t.es)]
+        |=  es=(list sexp)       ^-  *
+        ?~  es    ~              ::  () = ~
+        ?~  t.es  (one i.es)     ::  (a) = a
+        [(one i.es) $(es t.es)]  ::  dubious, but convenient...
       --
         %bump
       ?>  =(2 (lent l))
@@ -217,29 +217,36 @@
       [%dint +.tag $(e &3.l) $(e &4.l)]
     ==
   ==
-++  bind-del
-  |=  [nam=@ =env]
-  %.  [nam 0 0]
-  %~  put  by
-  %-  ~(run by env)
-  |=  a=bind
-  a(del +(del.a))
+++  delv
+  =/  axe=@  1
+  |=  [t=neet n=@t]
+  ^-  @  ::  0 means "not found"
+  ?@  t  ?:(=(n t) axe 0)
+  =/  l=@  $(axe (peg axe 2), t p.t)
+  ?.  =(0 l)  l
+  $(axe (peg axe 3), t q.t)
+++  find
+  =|  del=@
+  |=  [ns=env n=@t]
+  ^-  $@(~ [del=@ axe=@])
+  ?~  ns  ~
+  =/  axe=@  (delv i.ns n)
+  ?.  =(0 axe)  [del axe]
+  $(ns t.ns, del +(del))
 ++  bind-lam
-  |=  [nam=@ =env]
-  %.  [nam 0 1]
-  %~  put  by
-  %-  ~(run by env)
-  |=  a=bind
-  ?.  =(0 del.a)  a
-  ?:  =(0 lam.a)  a
-  a(lam +(lam.a))
+  |=  [net=neet e=env]
+  ^-  env
+  ?~  e  [[net ''] ~]
+  [[net i.e] t.e]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
   =|  =env
   |-  ^-  core
   ?@  e
-    name+(~(got by env) e)
+    =/  n  (find env e)
+    ?.  ?=(~ n)  name+n
+    ~|("unbound name {<e>}" !!)
   ?-  -.e
     %cons  [$(e p.e) $(e q.e)]
     %frag  [%frag axe.e $(e of.e)]
@@ -252,7 +259,7 @@
     %letn  [%letn $(e val.e) $(e in.e, env (bind-lam nam.e env))]
     %lamb  [%lamb $(e bod.e, env (bind-lam arg.e env))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, env (bind-del arg.e env))]
+    %delt  [%delt $(e bod.e, env [arg.e env])]
     %appd  [%appd $(e del.e) $(e arg.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
@@ -263,12 +270,7 @@
   ^-  *  ::  punk
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
-    %name  =/  f=*
-             :-  0
-             ?:  =(0 lex.e)  1  :: the backquote subject
-             ::  subject is a list of bound values
-             ::  lex 1s (tails) followed by a head (0)
-             (lsh [0 1] (dec (lsh [0 lex.e] 1)))
+    %name  =/  f=*  [0 axe.e]
            ?:  =(0 dex.e)  f
            :-  1
            =|  i=@
@@ -332,23 +334,38 @@
 :-  %noun
 ?-  cmd
     %test
+  ~|  t+0
   ?>  .=  42
       .*  ~  (user-to-nock %appl [%lamb %a %a] %litn 42)
+  ~|  t+1
   ?>  .=  42
       (lsdectape "24")
+  ~|  t+2
   ?>  .=  [42 63]  :: dfns can close over lexicals
       .*  63
       (run-tape "(let x 42 (dfn y (cons x y)))")
+  ~|  t+3
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
       "(dcall (dcall (dfn x (dfn y (cons x y))) 42) 63)"
+  ~|  t+4
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
+  ~|  t+5
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
+  ~|  t+6
   ?>  .=  42       (run-tape "(lit 42)")
+  ~|  t+7
+  ?>  .=  42       (run-tape "(lit 42)")
+  ~|  t+8
   ?>  .=  42       (run-tape "(lit (42))")
-  ?>  .=  42       ::  decrement
-      %-  run-tape
-      "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
+  ~|  t+%id
+  ?>  .=  42       (run-tape "((fn x x) 42)")
+  ~|  t+%nest
+  ?>  .=  [40 2]   (run-tape "(((fn x (fn y (cons x y))) 40) 2)")
+  =/  dec-src=tape
+    "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
+  ~|  [t+%dec (cram !>((compile-tape dec-src)))]
+  ?>  =(42 (run-tape dec-src))
   %ok
     [%eval *]
   (run-tape +.cmd)
