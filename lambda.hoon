@@ -25,8 +25,18 @@
 +$  neet
   $@  @t
   [p=neet q=neet]
-+$  env
-  (list neet)
++$  subj
+  $^  [p=subj q=subj]
+  $%  [%leg n=@t]
+      [%rec r=neet]
+  ==
++$  fond
+  $?  [%leg leg=@]
+      [%arm rec=@ arm=@]
+  ==
++$  fund  $@(~ fond)
++$  path  $@(~ [del=@ f=fond])
++$  env   (list subj)
 +$  user
   $~  %a
   $@  @t
@@ -49,7 +59,7 @@
 +$  core
   $~  [%name 0 0]
   $^  [p=core q=core]
-  $%  [%name dex=@ axe=@]
+  $%  [%name dex=@ how=$@(leg=@ [rec=@ arm=@])]
       [%frag axe=@ of=core]
       [%edit axe=@ tgt=core val=core]
       [%litn val=*]
@@ -232,34 +242,48 @@
   ==
 ++  delv
   =/  axe=@  1
-  |=  [t=neet n=@t]
-  ^-  @  ::  0 means "not found"
-  ?@  t  ?:(=(n t) axe 0)
-  =/  l=@  $(axe (peg axe 2), t p.t)
-  ?.  =(0 l)  l
-  $(axe (peg axe 3), t q.t)
+  |=  [t=subj n=@t]
+  ^-  fund
+  ?-  -.t
+    ^     =/  l  $(axe (peg axe 2), t p.t)
+          ?.  ?=(~ l)  l
+          $(axe (peg axe 3), t q.t)
+    %leg  ?:(=(n n.t) leg+axe ~)
+    %rec  =+  [bat arm]=`[neet @]`[r.t 1]
+          |-  ^-  fund
+          ?@  bat  ?:(=(n bat) arm+axe^bat ~)
+          =/  l  $(arm (peg arm 2), bat p.bat)
+          ?.  ?=(~ l)  l
+          $(arm (peg arm 3), bat q.bat)
+  ==
 ++  find
   =|  del=@
-  |=  [ns=env n=@t]
-  ^-  $@(~ [del=@ axe=@])
-  ?~  ns  ~
-  =/  axe=@  (delv i.ns n)
-  ?.  =(0 axe)  [del axe]
-  $(ns t.ns, del +(del))
+  |=  [=env n=@t]
+  ^-  path
+  ?~  env  ~
+  =/  u=fund   (delv i.env n)
+  ?.  ?=(~ u)  [del u]
+  $(env t.env, del +(del))
+++  neet-subj
+  |=  n=neet
+  ^-  subj
+  ?@  n  leg+n
+  [$(n p.n) $(n q.n)]
 ++  bind-lam
   |=  [net=neet e=env]
   ^-  env
-  ?~  e  [[net ''] ~]
-  [[net i.e] t.e]
+  =/  s  (neet-subj net)
+  ?~  e  [[s leg+''] ~]
+  [[s i.e] t.e]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
   =|  =env
   |-  ^-  core
   ?@  e
-    =/  n  (find env e)
-    ?.  ?=(~ n)  name+n
-    ~|("unbound name {<e>}" !!)
+    =/  p=path  (find env e)
+    ?~  p  ~|("unbound name {<e>}" !!)
+    [%name del.p +>.p]
   ?-  -.e
     %cons  [$(e p.e) $(e q.e)]
     %frag  [%frag axe.e $(e of.e)]
@@ -272,7 +296,7 @@
     %letn  [%letn $(e val.e) $(e in.e, env (bind-lam nam.e env))]
     %lamb  [%lamb $(e bod.e, env (bind-lam arg.e env))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, env [arg.e env])]
+    %delt  [%delt $(e bod.e, env [(neet-subj arg.e) env])]
     %appd  [%appd $(e del.e) $(e arg.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
@@ -283,7 +307,9 @@
   ^-  *  ::  punk
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
-    %name  =/  f=*  [0 axe.e]
+    %name  =/  f=*
+             ?@  how.e  [0 leg.how.e]
+             [9 arm.how.e 0 rec.how.e]
            ?:  =(0 dex.e)  f
            :-  1
            =|  i=@
@@ -345,6 +371,13 @@
 |=  [^ [=cmd ~] ~]
 :-  %noun
 ?-  cmd
+    [%eval *]
+  (run-tape +.cmd)
+    [%load *]
+  =/  w=wain  .^(wain %cx +.cmd)
+  =/  c=cord  (of-wain:format w)
+  =/  t=tape  (trip c)
+  (run-tape t)
     %test
   ~|  t+0
   ?>  .=  42
@@ -389,12 +422,5 @@
   ~|  [t+%dec (cram !>((compile-tape dec-src)))]
   ?>  =(42 (run-tape dec-src))
   %ok
-    [%eval *]
-  (run-tape +.cmd)
-    [%load *]
-  =/  w=wain  .^(wain %cx +.cmd)
-  =/  c=cord  (of-wain:format w)
-  =/  t=tape  (trip c)
-  (run-tape t)
 ==
 ==
