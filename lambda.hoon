@@ -372,6 +372,8 @@
   ?>  .=  2        (run-tape "((fn (x y) y) (cons 40 2))")
   ~|  t+'destructuring let'
   ?>  .=  5        (run-tape "(let (x y z) (lit 3 4 5) z)")
+  ~|  t+'parallel let'
+  ?>  .=  [2 40]   (run-tape "(let (x y) (cons 40 2) (cons y x))")
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
