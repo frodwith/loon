@@ -26,9 +26,10 @@
   $@  @t
   [p=neet q=neet]
 +$  subj
+  $~  [%leg '']
   $^  [p=subj q=subj]
   $%  [%leg n=@t]
-      [%rec r=neet]
+      [%rec bat=neet pay=subj]
   ==
 +$  fond
   $?  [%leg leg=@]
@@ -36,7 +37,7 @@
   ==
 +$  fund  $@(~ fond)
 +$  path  $@(~ [del=@ f=fond])
-+$  env   (list subj)
++$  env   (lest subj)
 +$  raph
   $^  [p=raph q=raph]
   [~ nam=@t exp=user]
@@ -63,7 +64,7 @@
 +$  core
   $~  [%name 0 0]
   $^  [p=core q=core]
-  $%  [%name dex=@ how=$@(leg=@ [rec=@ arm=@])]
+  $%  [%name dex=@ how=$@(@ [rec=@ arm=@])]
       [%frag axe=@ of=core]
       [%edit axe=@ tgt=core val=core]
       [%litn val=*]
@@ -162,6 +163,17 @@
            ?~  t.l  h
            [h $(l t.l)]
   ==
+++  parse-raph
+  |=  e=sexp
+  ?>  ?=([%list *] e)
+  =/  es=(list sexp)  +.e
+  |-  ^-  raph
+  ?~  es    !!
+  ?~  t.es  ^$(e i.es)
+  ?:  ?=([%sym *] i.es)
+    ?>  ?=([* ~] t.es)
+    [~ +.i.es (parse i.t.es)]
+  [^$(e i.es) $(es t.es)]
 ++  parse
   |=  e=sexp
   ^-  user
@@ -222,6 +234,9 @@
       ?>  =(4 (lent l))
       =/  nam  &2.l
       [%letn (parse-neet nam) $(e &3.l) $(e &4.l)]
+        %letrec
+      ?>  =(3 (lent l))
+      [%letr (parse-raph &2.l) $(e &3.l)]
         %dcall
       ?>  =(3 (lent l))
       [%appd $(e &2.l) $(e &3.l)]
@@ -237,12 +252,12 @@
       ?>  =(3 (lent l))
       =/  tag  &2.l
       ?>  ?=(@ tag)
-      [%sint +.tag $(e &3.l)]
+      [%sint tag $(e &3.l)]
         %dint
       ?>  =(4 (lent l))
       =/  tag  &2.l
       ?>  ?=(@ tag)
-      [%dint +.tag $(e &3.l) $(e &4.l)]
+      [%dint tag $(e &3.l) $(e &4.l)]
     ==
   ==
 ++  delv
@@ -254,36 +269,39 @@
           ?.  ?=(~ l)  l
           $(axe (peg axe 3), t q.t)
     %leg  ?:(=(n n.t) leg+axe ~)
-    %rec  =+  [bat arm]=`[neet @]`[r.t 1]
-          |-  ^-  fund
-          ?@  bat  ?:(=(n bat) arm+axe^bat ~)
-          =/  l  $(arm (peg arm 2), bat p.bat)
-          ?.  ?=(~ l)  l
-          $(arm (peg arm 3), bat q.bat)
+    %rec  =/  fib=fund
+            =/  arm=@  2
+            =/  bat=neet  bat.t
+            |-  ^-  fund
+            ?@  bat  ?:(=(n bat) [%arm axe arm] ~)
+            =/  l  $(arm (peg arm 2), bat p.bat)
+            ?.  ?=(~ l)  l
+            $(arm (peg arm 3), bat q.bat)
+          ?.  ?=(~ fib)  fib
+          $(t pay.t, axe (peg axe 3))
   ==
 ++  find
   =|  del=@
   |=  [=env n=@t]
+  ::  =-  ~&  [env=env n=n pro=-]  -
   ^-  path
-  ?~  env  ~
   =/  u=fund   (delv i.env n)
   ?.  ?=(~ u)  [del u]
+  ?~  t.env    ~
   $(env t.env, del +(del))
 ++  neet-subj
   |=  n=neet
   ^-  subj
   ?@  n  leg+n
   [$(n p.n) $(n q.n)]
-++  bind-lam
-  |=  [net=neet e=env]
+++  bind-neet
+  |=  [e=env net=neet]
   ^-  env
-  =/  s  (neet-subj net)
-  ?~  e  [[s leg+''] ~]
-  [[s i.e] t.e]
+  [[(neet-subj net) i.e] t.e]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
-  =|  =env
+  =/  =env  ~[leg+'']
   |-  ^-  core
   ?@  e
     =/  p=path  (find env e)
@@ -298,16 +316,16 @@
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, env (bind-lam nam.e env))]
+    %letn  [%letn $(e val.e) $(e in.e, env (bind-neet env nam.e))]
     %letr  =+  =/  rap  g.e
                |-  ^-  [n=neet u=user]
                ?~  -.rap  +.rap
                =/  l  $(rap p.rap)
                =/  r  $(rap q.rap)
                [[n.l n.r] %cons u.l u.r]
-           =.  env  [rec+n env]
+           =.  env  [[%rec n i.env] t.env]
            [%letr $(e u) $(e in.e)]
-    %lamb  [%lamb $(e bod.e, env (bind-lam arg.e env))]
+    %lamb  [%lamb $(e bod.e, env (bind-neet env arg.e))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
     %delt  [%delt $(e bod.e, env [(neet-subj arg.e) env])]
     %appd  [%appd $(e del.e) $(e arg.e)]
@@ -321,7 +339,7 @@
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
     %name  =/  f=*
-             ?@  how.e  [0 leg.how.e]
+             ?@  how.e  [0 how.e]
              [9 arm.how.e 0 rec.how.e]
            ?:  =(0 dex.e)  f
            :-  1
@@ -393,6 +411,11 @@
   =/  t=tape  (trip c)
   (run-tape t)
     %test
+  ~|  t+'raph parse'
+  ?>  .=  [~ %x %litn 12]  (parse-raph (read "(x 12)"))
+  ?>  .=  [~ %x %litn 12]  (parse-raph (read "((x 12))"))
+  ?>  .=  [[~ %x %litn 40] ~ %y %litn 2]
+      (parse-raph (read "((x 40) (y 2))"))
   ~|  t+0
   ?>  .=  42
       .*  ~  (user-to-nock %appl [%lamb %a %a] %litn 42)
@@ -433,8 +456,18 @@
   ?>  .=  [40 2]   (run-tape "(((fn x (fn y (cons x y))) 40) 2)")
   =/  dec-src=tape
     "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
-  ~|  [t+%dec (cram !>((compile-tape dec-src)))]
-  ?>  =(42 (run-tape dec-src))
+  ?.  =(42 (run-tape dec-src))
+    ~|([t+%dec (cram !>((compile-tape dec-src)))] !!)
+  ~|  t+%letrec
+  ?>  =(42 (run-tape "(letrec (x 42) x)"))
+  ~|  t+%'close your eyes, make a wish...'
+  ?>  .=  3  %-  run-tape
+    "(letrec (loop (fn x (if (same x 3) x (loop (bump x))))) (loop 1))"
+  =/  lrdec-src=tape
+    "(let dec (fn n (letrec (loop (fn i (let up (bump i) (if (same up n) i (loop up))))) (loop 0))) (dec 43))"
+  ?.  =(42 (run-tape lrdec-src))
+    ~|([t+%lrdec (cram !>((compile-tape lrdec-src)))] !!)
+  ~&  (cram !>((compile-tape lrdec-src)))
   %ok
 ==
 ==
