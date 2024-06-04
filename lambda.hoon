@@ -232,9 +232,6 @@
     ?+  +.op  ~|  l
               ?>  =(2 (lent l))
               [%appl +.op $(e &2.l)]
-        %cons
-      ?>  =(3 (lent l))
-      [%cons $(e &2.l) $(e &3.l)]
         %frag
       ?>  =(3 (lent l))
       =/  axe  &2.l
@@ -471,11 +468,11 @@
   ~|  t+2
   ?>  .=  [42 63]  :: dfns can close over lexicals
       .*  63
-      (run-tape "(let x 42 (dfn y (cons x y)))")
+      (run-tape "(let x 42 (dfn y [x y]))")
   ~|  t+3
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
-      "(nock 63 (nock 42 (dfn x (dfn y (cons x y)))))"
+      "(nock 63 (nock 42 (dfn x (dfn y [x y]))))"
   ~|  t+"literal nock formula"
   ?>  .=  42
       %-  run-tape
@@ -491,13 +488,13 @@
   ?>  .=  [%x %y %z]    (parse-neet (read "[x y z]"))
   ?>  .=  [[%x %y] %z]  (parse-neet (read "[[x y] z]"))
   ~|  t+%fst
-  ?>  .=  40       (run-tape "((fn [x y] x) (cons 40 2))")
+  ?>  .=  40       (run-tape "((fn [x y] x) [40 2])")
   ~|  t+%snd
-  ?>  .=  2        (run-tape "((fn [x y] y) (cons 40 2))")
+  ?>  .=  2        (run-tape "((fn [x y] y) [40 2])")
   ~|  t+'destructuring let'
   ?>  .=  5        (run-tape "(let [x y z] (lit 3 4 5) z)")
   ~|  t+'parallel let'
-  ?>  .=  [2 40]   (run-tape "(let [x y] (cons 40 2) (cons y x))")
+  ?>  .=  [2 40]   (run-tape "(let [x y] [40 2] [y x])")
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
@@ -512,7 +509,7 @@
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
-  ?>  .=  [40 2]   (run-tape "(((fn x (fn y (cons x y))) 40) 2)")
+  ?>  .=  [40 2]   (run-tape "(((fn x (fn y [x y])) 40) 2)")
   =/  dec-src=tape
     "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
   ?.  =(42 (run-tape dec-src))
@@ -555,8 +552,8 @@
  (letrec
   ((odd (fn n (if (same 0 n) 1 (evn (nock n dec)))))
    (evn (fn n (if (same 0 n) 0 (odd (nock n dec))))))
-  (cons (dfn n (odd n))
-        (dfn n (evn n)))))
+  [(dfn n (odd n))
+   (dfn n (evn n))]))
 """
   ?>  =(0 .*(42 even))
   ?>  =(1 .*(42 odd))
