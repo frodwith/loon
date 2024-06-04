@@ -28,6 +28,11 @@
 +$  neet
   $@  @t
   [p=neet q=neet]
++$  bind
+  $@  @t
+  $%  [%cell n=@ l=bind r=bind]  :: ~ for nameless
+      [%core bat=neet pay=bind]
+  ==
 +$  subj
   $~  [%leg '']
   $^  [p=subj q=subj]
@@ -40,7 +45,8 @@
   ==
 +$  fund  $@(~ fond)
 +$  path  $@(~ [del=@ f=fond])
-+$  env   (lest subj)
++$  gamma  (lest bind)
++$  env    (lest subj)
 +$  raph
   $^  [p=raph q=raph]
   [~ nam=@t exp=user]
@@ -300,6 +306,31 @@
       [%dint tag $(e &3.l) $(e &4.l)]
     ==
   ==
+++  bind-delv
+  =/  axe=@  1
+  |=  [b=bind n=@t]
+  ^-  fund
+  ?-  b
+      @
+    ?.  =(n b)  ~
+    leg+axe
+      [%cell *]
+    ?:  =(n n.b)  leg+axe
+    =/  l  $(b l.b)
+    ?.  ?=(~ l)  l
+    $(b r.b)
+      [%core *]
+    =/  fib=fund  :: found in battery
+      =/  arm=@  2
+      =/  bat=neet  bat.b
+      |-  ^-  fund
+      ?@  bat  ?:(=(n bat) [%arm axe arm] ~)
+      =/  l  $(arm (peg 2 arm), bat p.bat)
+      ?.  ?=(~ l)  l
+      $(arm (peg arm 3), bat q.bat)
+    ?.  ?=(~ fib)  fib
+    $(b pay.b, axe (peg axe 3))
+  ==
 ++  delv
   =/  axe=@  1
   |=  [t=subj n=@t]
@@ -329,6 +360,23 @@
   ?.  ?=(~ u)  [del u]
   ?~  t.env    ~
   $(env t.env, del +(del))
+++  gamma-find
+  =|  del=@
+  |=  [g=gamma n=@t]
+  ^-  path
+  =/  u=fund   (bind-delv i.g n)
+  ?.  ?=(~ u)  [del u]
+  ?~  t.g    ~
+  $(g t.g, del +(del))
+++  neet-to-bind
+  |=  n=neet
+  ^-  bind
+  ?@  n  n
+  [%cell ~ $(n p.n) $(n q.n)]
+++  extend-neet
+  |=  [g=gamma net=neet]
+  ^-  gamma
+  [[%cell ~ (neet-to-bind net) i.g] t.g]
 ++  neet-subj
   |=  n=neet
   ^-  subj
@@ -545,7 +593,7 @@
 ::  they could be dfns if they could each inline the enclosing
 ::  core instead, but we don't currently allow reference to the
 ::  cores created by letrec (".").
-::  finally, it "exports" dfn wrappers around odd and even.
+::  finally, it "exports" dfn wrappers around odd and evn.
   =+  ^=  [odd even]  .*  ddec  %-  run-tape
 """
 (dfn dec
@@ -557,6 +605,8 @@
 """
   ?>  =(0 .*(42 even))
   ?>  =(1 .*(42 odd))
+  ::  next up: add split
+  ::  (split foo [[_ x] _] x)
   %ok
 ==
 ==
