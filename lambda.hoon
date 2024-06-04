@@ -29,8 +29,9 @@
   $@  @t
   [p=neet q=neet]
 +$  bind
-  $@  @t
-  $%  [%cell n=@ l=bind r=bind]  :: ~ for nameless
+  $~  leaf+~
+  $%  [%leaf ns=(list @)]
+      [%cell ns=(list @) l=bind r=bind]
       [%core bat=neet pay=bind]
   ==
 +$  fond
@@ -55,6 +56,7 @@
       [%same a=user b=user]
       [%cond t=user y=user n=user]
       [%letn nam=neet val=user in=user]
+      [%bind var=@t to=neet in=user]
       [%letr g=raph in=user]
       [%lamb arg=neet bod=user]
       [%appl lam=user arg=user]
@@ -273,6 +275,11 @@
       ?>  =(4 (lent l))
       =/  nam  &2.l
       [%letn (parse-neet nam) $(e &3.l) $(e &4.l)]
+        %bind
+      ?>  =(4 (lent l))
+      =/  var  &2.l
+      ?>  ?=([%sym *] var)
+      [%bind +.var (parse-neet &3.l) $(e &4.l)]
         %letrec
       ?>  =(3 (lent l))
       [%letr (parse-raph &2.l) $(e &3.l)]
@@ -299,20 +306,26 @@
       [%dint tag $(e &3.l) $(e &4.l)]
     ==
   ==
+++  one-of
+  |=  [n=@t l=(list @t)]
+  ^-  ?
+  ?~  l  |
+  ?:  =(n i.l)  &
+  $(l t.l)
 ++  bind-delv
   =/  axe=@  1
   |=  [b=bind n=@t]
   ^-  fund
-  ?-  b
-      @
-    ?.  =(n b)  ~
+  ?-  -.b
+      %leaf
+    ?.  (one-of n ns.b)  ~
     leg+axe
-      [%cell *]
-    ?:  =(n n.b)  leg+axe
+      %cell
+    ?:  (one-of n ns.b)  leg+axe
     =/  l  $(b l.b, axe (peg axe 2))
     ?.  ?=(~ l)  l
     $(b r.b, axe (peg axe 3))
-      [%core *]
+      %core
     =/  fib=fund  :: found in battery
       =/  arm=@  2
       =/  bat=neet  bat.b
@@ -335,12 +348,30 @@
 ++  neet-to-bind
   |=  n=neet
   ^-  bind
-  ?@  n  n
+  ?@  n  [%leaf n ~]
   [%cell ~ $(n p.n) $(n q.n)]
 ++  extend-neet
   |=  [g=gamma net=neet]
   ^-  gamma
   [[%cell ~ (neet-to-bind net) i.g] t.g]
+++  bind-neet
+  |=  [b=bind net=neet]
+  ^-  bind
+  ?@  net
+    ?+  -.b  !!
+      %cell  b(ns [net ns.b])
+      %leaf  b(ns [net ns.b])
+    ==
+  ?+  -.b  !!
+    %cell  %=  b
+             l  $(b l.b, net p.net)
+             r  $(b r.b, net q.net)
+           ==
+    %leaf  =/  n=neet  net
+           |-  ^-  bind
+           ?@  n  [%leaf n ~]
+           [%cell ~ $(n p.n) $(n q.n)]
+  ==
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
@@ -360,6 +391,26 @@
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
     %letn  [%letn $(e val.e) $(e in.e, g (extend-neet g nam.e))]
+    %bind  =/  p=path  (gamma-find g var.e)
+           ?~  p  ~|("unbound name {<var.e>}" !!)
+           ?:  ?=(%arm -.f.p)  ~|("{<var.e>} is letrec-bound" !!)
+           %=  $
+             e  in.e
+             g  |-  ^-  gamma  :: find the right delta level
+                ?.  =(0 del.p)
+                  ?~  t.g  !!  :: won't happen, already found
+                  :-  i.g
+                  $(del.p (dec del.p), g t.g)
+                :_  t.g
+                =+  [axe bin]=[leg.f.p i.g]
+                |-  ^-  bind   :: descend to the right axis
+                ?:  =(1 axe)  (bind-neet bin to.e)
+                ?>  ?=(%cell -.bin)
+                =/  hed  =(2 (cap axe))
+                =.  axe  (mas axe)
+                ?:  hed  bin(l $(bin l.bin))
+                bin(r $(bin r.bin))
+           ==
     %letr  =+  =/  rap  g.e
                |-  ^-  [n=neet u=user]
                ?~  -.rap  +.rap
@@ -498,6 +549,10 @@
   ?>  .=  5        (run-tape "(let [x y z] (lit 3 4 5) z)")
   ~|  t+'parallel let'
   ?>  .=  [2 40]   (run-tape "(let [x y] [40 2] [y x])")
+  ~|  t+'bind'
+  ?>  .=  [3 1 2]
+    %-  run-tape
+    "(let x [1 2 3] (bind x [a b c] [c a b]))"
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
