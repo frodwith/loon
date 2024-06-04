@@ -243,22 +243,6 @@
       =/  axe  &2.l
       ?>  ?=(@ axe)
       [%edit axe $(e &3.l) $(e &4.l)]
-        %lit
-      :-  %litn
-      =-  (litl +.l)
-      |%
-      ++  one
-        |=  e=sexp
-        ^-  *
-        ?@  e  e
-        ?:  ?=(%sym -.e)  ~|("symbol in literal" !!)
-        (litl +.e)
-      ++  litl
-        |=  es=(list sexp)       ^-  *
-        ?~  es    ~              ::  () = ~
-        ?~  t.es  (one i.es)     ::  (a) = a
-        [(one i.es) $(es t.es)]  ::  dubious, but convenient...
-      --
         %bump
       ?>  =(2 (lent l))
       [%bump $(e &2.l)]
@@ -530,7 +514,7 @@
   ~|  t+"literal nock formula"
   ?>  .=  42
       %-  run-tape
-      "(nock 41 (lit 4 0 1))"
+      "(nock 41 [4 0 1])"
   ~|  t+'read'
   ?>  .=  [%rond 1 2 3 ~]          (read "(1 2 3)")
   ?>  .=  [%sqar 1 2 3 ~]          (read "[1 2 3]")
@@ -546,7 +530,7 @@
   ~|  t+%snd
   ?>  .=  2        (run-tape "((fn [x y] y) [40 2])")
   ~|  t+'destructuring let'
-  ?>  .=  5        (run-tape "(let [x y z] (lit 3 4 5) z)")
+  ?>  .=  5        (run-tape "(let [x y z] [3 4 5] z)")
   ~|  t+'parallel let'
   ?>  .=  [2 40]   (run-tape "(let [x y] [40 2] [y x])")
   ~|  t+'bind'
@@ -554,11 +538,7 @@
     %-  run-tape
     "(let x [1 2 3] (bind x [a b c] [c a b]))"
   ~|  t+%lits
-  ?>  .=  [40 2]   (run-tape "(lit 40 2)")
-  ?>  .=  [40 2]   (run-tape "(lit (40 2))")
-  ?>  .=  42       (run-tape "(lit 42)")
-  ?>  .=  42       (run-tape "(lit 42)")
-  ?>  .=  42       (run-tape "(lit (42))")
+  ?>  .=  [40 2]   (run-tape "[40 2]")
   ~|  t+%sqar
   ?>  .=  [1 40 2]
       (compile-tape "[40 2]")
