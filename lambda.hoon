@@ -201,14 +201,29 @@
     ?>  ?=([* ~] t.es)
     [~ +.i.es (parse i.t.es)]
   [^$(e i.es) $(es t.es)]
+++  june
+  |=  [a=user b=user]
+  ^-  user
+  ?.  &(?=([%litn *] a) ?=([%litn *] b))
+    [%cons a b]
+  [%litn val.a val.b]
 ++  parse
   |=  e=sexp
   ^-  user
   ?@  e  litn+e
   ?-  -.e
-    %sym  +.e
-    %sqar  !!  ::  XX
-    %rond
+      %sym  +.e
+      %sqar
+    =*  l  +.e
+    ?~  l  ~|('empty brackets' !!)
+    ?~  t.l  ~|('singleton brackets' !!)
+    %+  june  $(e i.l)
+    =/  p=(lest sexp)  t.l
+    |-  ^-  user
+    =/  one  ^$(e i.p)
+    ?~  t.p  one
+    (june one $(p t.p))
+      %rond
     =*  l  +.e
     =/  op  &1.l
     ?.  ?=([%sym *] op)
@@ -489,6 +504,11 @@
   ?>  .=  42       (run-tape "(lit 42)")
   ?>  .=  42       (run-tape "(lit 42)")
   ?>  .=  42       (run-tape "(lit (42))")
+  ~|  t+%sqar
+  ?>  .=  [1 40 2]
+      (compile-tape "[40 2]")
+  ?>  .=  [40 2]
+      (run-tape "(let x 40 (let y 2 [x y]))")
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
