@@ -33,12 +33,6 @@
   $%  [%cell n=@ l=bind r=bind]  :: ~ for nameless
       [%core bat=neet pay=bind]
   ==
-+$  subj
-  $~  [%leg '']
-  $^  [p=subj q=subj]
-  $%  [%leg n=@t]
-      [%rec bat=neet pay=subj]
-  ==
 +$  fond
   $?  [%leg leg=@]
       [%arm rec=@ arm=@]
@@ -46,7 +40,6 @@
 +$  fund  $@(~ fond)
 +$  path  $@(~ [del=@ f=fond])
 +$  gamma  (lest bind)
-+$  env    (lest subj)
 +$  raph
   $^  [p=raph q=raph]
   [~ nam=@t exp=user]
@@ -316,9 +309,9 @@
     leg+axe
       [%cell *]
     ?:  =(n n.b)  leg+axe
-    =/  l  $(b l.b)
+    =/  l  $(b l.b, axe (peg axe 2))
     ?.  ?=(~ l)  l
-    $(b r.b)
+    $(b r.b, axe (peg axe 3))
       [%core *]
     =/  fib=fund  :: found in battery
       =/  arm=@  2
@@ -331,35 +324,6 @@
     ?.  ?=(~ fib)  fib
     $(b pay.b, axe (peg axe 3))
   ==
-++  delv
-  =/  axe=@  1
-  |=  [t=subj n=@t]
-  ^-  fund
-  ?-  -.t
-    ^     =/  l  $(axe (peg axe 2), t p.t)
-          ?.  ?=(~ l)  l
-          $(axe (peg axe 3), t q.t)
-    %leg  ?:(=(n n.t) leg+axe ~)
-    %rec  =/  fib=fund
-            =/  arm=@  2
-            =/  bat=neet  bat.t
-            |-  ^-  fund
-            ?@  bat  ?:(=(n bat) [%arm axe arm] ~)
-            =/  l  $(arm (peg arm 2), bat p.bat)
-            ?.  ?=(~ l)  l
-            $(arm (peg arm 3), bat q.bat)
-          ?.  ?=(~ fib)  fib
-          $(t pay.t, axe (peg axe 3))
-  ==
-++  find
-  =|  del=@
-  |=  [=env n=@t]
-  ::  =-  ~&  [env=env n=n pro=-]  -
-  ^-  path
-  =/  u=fund   (delv i.env n)
-  ?.  ?=(~ u)  [del u]
-  ?~  t.env    ~
-  $(env t.env, del +(del))
 ++  gamma-find
   =|  del=@
   |=  [g=gamma n=@t]
@@ -377,22 +341,13 @@
   |=  [g=gamma net=neet]
   ^-  gamma
   [[%cell ~ (neet-to-bind net) i.g] t.g]
-++  neet-subj
-  |=  n=neet
-  ^-  subj
-  ?@  n  leg+n
-  [$(n p.n) $(n q.n)]
-++  bind-neet
-  |=  [e=env net=neet]
-  ^-  env
-  [[(neet-subj net) i.e] t.e]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
-  =/  =env  ~[leg+'']
+  =|  g=gamma
   |-  ^-  core
   ?@  e
-    =/  p=path  (find env e)
+    =/  p=path  (gamma-find g e)
     ?~  p  ~|("unbound name {<e>}" !!)
     [%name del.p +>.p]
   ?-  -.e
@@ -404,18 +359,18 @@
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, env (bind-neet env nam.e))]
+    %letn  [%letn $(e val.e) $(e in.e, g (extend-neet g nam.e))]
     %letr  =+  =/  rap  g.e
                |-  ^-  [n=neet u=user]
                ?~  -.rap  +.rap
                =/  l  $(rap p.rap)
                =/  r  $(rap q.rap)
                [[n.l n.r] %cons u.l u.r]
-           =.  env  [[%rec n i.env] t.env]
+           =.  g  [[%core n i.g] t.g]
            [%letr $(e u) $(e in.e)]
-    %lamb  [%lamb $(e bod.e, env (bind-neet env arg.e))]
+    %lamb  [%lamb $(e bod.e, g (extend-neet g arg.e))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, env [(neet-subj arg.e) env])]
+    %delt  [%delt $(e bod.e, g [(neet-to-bind arg.e) g])]
     %nock  [%nock $(e arg.e) $(e del.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
