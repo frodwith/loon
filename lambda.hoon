@@ -12,14 +12,15 @@
 ::  we compile to nock through punk, the quasiquote-nock.
 |%
 +$  token :: XX: add position info
-  $@  ?(%'(' %')')
+  $@  ?(%'(' %')' %'[' %']')
   $%  [%sym @t]
       [%num @]
   ==
 +$  sexp
   $@  @
   $%  [%sym @t]
-      [%list (list sexp)]
+      [%rond (list sexp)]
+      [%sqar (list sexp)]
   ==
 +$  toke-state
   $@  ~
@@ -115,6 +116,10 @@
     $(out [%'(' (tok-fin st out)], st ~)
   ?:  =(')' c)
     $(out [%')' (tok-fin st out)], st ~)
+  ?:  =('[' c)
+    $(out [%'[' (tok-fin st out)], st ~)
+  ?:  =(']' c)
+    $(out [%']' (tok-fin st out)], st ~)
   ?:  |(=(' ' c) =('\0a' c))
     $(out (tok-fin st out), st ~)
   ?:  &((gte c 'a') (lte c 'z'))
@@ -135,22 +140,41 @@
   (read-tokens (tokenize in))
 ++  read-tokens
   |=  in=(list token)
-  =|  stk=(lest (list sexp))
+  =/  stk=(lest (pair ?(%top %rond %sqar) (list sexp)))  ~[top+~]
   |-  ^-  sexp
   ?~  in
-    ?~  t.stk
-      ?~  i.stk  ~|(%a !!)  :: XX - error messages
-      ?~  i.i.stk  ~|(%b !!)
-      i.i.stk
-    ~|(%c !!)
+    ::  stack should have one item in it, or we left out a )]
+    ?.  ?=(~ t.stk)      ~|('unclosed group' !!)
+    ?~  q.i.stk          ~|('no expression' !!)
+    ?.  ?=(~ t.q.i.stk)  ~|('too many expressions' !!)
+    i.q.i.stk
   =/  t  i.in
   =>  .(in t.in)
   ?-  t
-    %'('      $(stk [~ stk])
-    %')'      ?~  t.stk  !!
-              $(stk [[[%list (flop i.stk)] i.t.stk] t.t.stk])
-    [%sym *]  $(stk [[[%sym +.t] i.stk] t.stk])
-    [%num *]  $(stk [[+.t i.stk] t.stk])
+      %'('
+    $(stk [rond+~ stk])
+      %'['
+    $(stk [sqar+~ stk])
+      [%sym *]
+    $(q.i.stk [[%sym +.t] q.i.stk])
+      [%num *]
+    $(q.i.stk [+.t q.i.stk])
+      %')'
+    ?-  p.i.stk
+        %top   ~|('unmatched closing paren' !!)
+        %sqar  ~|('closing bracket with paren' !!)
+        %rond
+      ?<  ?=(~ t.stk)  ::  would be %top
+      $(stk t.stk(q.i [rond+(flop q.i.stk) q.i.t.stk]))
+    ==
+      %']'
+    ?-  p.i.stk
+        %top   ~|('unmatched closing bracket' !!)
+        %rond  ~|('closing paren with bracket' !!)
+        %sqar
+      ?<  ?=(~ t.stk)  ::  would be %top
+      $(stk t.stk(q.i [sqar+(flop q.i.stk) q.i.t.stk]))
+    ==
   ==
 ++  parse-neet
   |=  e=sexp
@@ -158,7 +182,8 @@
   ?@  e  ~|("number in binding tree {<e>}" !!)
   ?-  -.e
     %sym   +.e
-    %list  ?~  +.e  ~|("empty binding tree" !!)
+    %sqar  !!  ::  XX
+    %rond  ?~  +.e  ~|("empty binding tree" !!)
            =/  l=(lest sexp)  +.e
            |-  ^-  neet
            =/  h  ^$(e i.l)
@@ -167,7 +192,7 @@
   ==
 ++  parse-raph
   |=  e=sexp
-  ?>  ?=([%list *] e)
+  ?>  ?=([%rond *] e)
   =/  es=(list sexp)  +.e
   |-  ^-  raph
   ?~  es    !!
@@ -182,7 +207,8 @@
   ?@  e  litn+e
   ?-  -.e
     %sym  +.e
-    %list
+    %sqar  !!  ::  XX
+    %rond
     =*  l  +.e
     =/  op  &1.l
     ?.  ?=([%sym *] op)
@@ -398,13 +424,16 @@
 --
 =/  cmd
   $@  %test
-  $%  [%eval tape]
+  $%  [%read tape]
+      [%eval tape]
       [%load path]
   ==
 :-  %say
 |=  [^ [=cmd ~] ~]
 :-  %noun
 ?-  cmd
+    [%read *]
+  (read +.cmd)
     [%eval *]
   (run-tape +.cmd)
     [%load *]
@@ -436,6 +465,10 @@
   ?>  .=  42
       %-  run-tape
       "(nock 41 (lit 4 0 1))"
+  ~|  t+'read'
+  ?>  .=  [%rond 1 2 3 ~]          (read "(1 2 3)")
+  ?>  .=  [%sqar 1 2 3 ~]          (read "[1 2 3]")
+  ?>  .=  [%sqar 1 [%rond ~] 3 ~]  (read "[1 () 3]")
   ~|  t+'neet parse'
   ?>  .=  %x            (parse-neet (read "x"))
   ?>  .=  %x            (parse-neet (read "(x)"))
