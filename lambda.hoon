@@ -3,10 +3,12 @@
 ::  the lambda-delta calculus is an augmentation of the untyped lambda calculus.
 ::  we start with abstraction and application (lamb/appl), and we add:
 ::    nouns (cons,1,3,4,5,10)
-::    let (8 - the subject is a list of bound values)
+::    let (8 - the subject is a tree of bound values)
 ::    if-then-else (6)
 ::    hints (11)
-::    delta abstraction and application (quasiquotes lambdas, delt/appd)
+::    delta abstraction and application (quasiquotes lambdas, delt/nock)
+::      Delta abstractions are nock formulas.
+::      It is legal to delta apply a noun (see the nock spec for semantics).
 ::  we compile to nock through punk, the quasiquote-nock.
 |%
 +$  token :: XX: add position info
@@ -57,7 +59,7 @@
       [%lamb arg=neet bod=user]
       [%appl lam=user arg=user]
       [%delt arg=neet bod=user]
-      [%appd del=user arg=user]
+      [%nock arg=user del=user]
       [%sint tag=@ exp=user]
       [%dint tag=@ clu=user exp=user]
   ==
@@ -77,7 +79,7 @@
       [%lamb bod=core]
       [%appl lam=core arg=core]
       [%delt bod=core]
-      [%appd del=core arg=core]
+      [%nock arg=core del=core]
       [%sint tag=@ exp=core]
       [%dint tag=@ clu=core exp=core]
   ==
@@ -237,9 +239,9 @@
         %letrec
       ?>  =(3 (lent l))
       [%letr (parse-raph &2.l) $(e &3.l)]
-        %dcall
+        %nock
       ?>  =(3 (lent l))
-      [%appd $(e &2.l) $(e &3.l)]
+      [%nock $(e &2.l) $(e &3.l)]
         %fn
       ?>  =(3 (lent l))
       =/  arg  &2.l
@@ -328,7 +330,7 @@
     %lamb  [%lamb $(e bod.e, env (bind-neet env arg.e))]
     %appl  [%appl $(e lam.e) $(e arg.e)]
     %delt  [%delt $(e bod.e, env [(neet-subj arg.e) env])]
-    %appd  [%appd $(e del.e) $(e arg.e)]
+    %nock  [%nock $(e arg.e) $(e del.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
   ==
@@ -359,7 +361,7 @@
     %lamb  [[1 $(e bod.e)] 0 1]
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
-    %appd  [2 $(e arg.e) $(e del.e)]
+    %nock  [2 $(e arg.e) $(e del.e)]
     %sint  [11 tag.e $(e exp.e)]
     %dint  [11 [tag.e $(e clu.e)] $(e exp.e)]
   ==
@@ -429,7 +431,11 @@
   ~|  t+3
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
-      "(dcall (dcall (dfn x (dfn y (cons x y))) 42) 63)"
+      "(nock 63 (nock 42 (dfn x (dfn y (cons x y)))))"
+  ~|  t+"literal nock formula"
+  ?>  .=  42
+      %-  run-tape
+      "(nock 41 (lit 4 0 1))"
   ~|  t+'neet parse'
   ?>  .=  %x            (parse-neet (read "x"))
   ?>  .=  %x            (parse-neet (read "(x)"))
