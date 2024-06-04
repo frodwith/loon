@@ -507,6 +507,39 @@
   ?.  =(42 (run-tape lrdec-src))
     ~|([t+%lrdec (cram !>((compile-tape lrdec-src)))] !!)
   ~&  (cram !>((compile-tape lrdec-src)))
+  ~|  t+%odd
+  =/  ddec  %-  run-tape
+"""
+(dfn n
+ (letrec
+  (loop
+   (fn i
+    (let up (bump i)
+     (if (same up n)
+      i
+      (loop up)))))
+  (loop 0)))
+"""
+  ?>  =(42 .*(43 ddec))
+::  this "module" "imports" dec (by taking it as an argument)
+::  then it defines two mutually recursive functions, odd and evn
+::  they aren't dfns because then they would try to inline
+::  each other, sending the compiler into an infinite loop.
+::  they could be dfns if they could each inline the enclosing
+::  core instead, but we don't currently allow reference to the
+::  cores created by letrec (".").
+::  finally, it "exports" dfn wrappers around odd and even.
+  =+  ^=  [odd even]  .*  ddec  %-  run-tape
+"""
+(dfn dec
+ (letrec
+  ((odd (fn n (if (same 0 n) 1 (evn (nock n dec)))))
+   (evn (fn n (if (same 0 n) 0 (odd (nock n dec))))))
+  (cons (dfn n (odd n))
+        (dfn n (evn n)))))
+"""
+  ?>  =(0 .*(42 even))
+  ?>  =(1 .*(42 odd))
   %ok
 ==
 ==
