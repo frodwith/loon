@@ -182,8 +182,8 @@
   ?@  e  ~|("number in binding tree {<e>}" !!)
   ?-  -.e
     %sym   +.e
-    %sqar  !!  ::  XX
-    %rond  ?~  +.e  ~|("empty binding tree" !!)
+    %rond  ~|('parens in binding tree' !!)
+    %sqar  ?~  +.e  ~|("empty binding tree" !!)
            =/  l=(lest sexp)  +.e
            |-  ^-  neet
            =/  h  ^$(e i.l)
@@ -471,18 +471,18 @@
   ?>  .=  [%sqar 1 [%rond ~] 3 ~]  (read "[1 () 3]")
   ~|  t+'neet parse'
   ?>  .=  %x            (parse-neet (read "x"))
-  ?>  .=  %x            (parse-neet (read "(x)"))
-  ?>  .=  [%x %y]       (parse-neet (read "(x y)"))
-  ?>  .=  [%x %y %z]    (parse-neet (read "(x y z)"))
-  ?>  .=  [[%x %y] %z]  (parse-neet (read "((x y) z)"))
+  ?>  .=  %x            (parse-neet (read "[x]"))
+  ?>  .=  [%x %y]       (parse-neet (read "[x y]"))
+  ?>  .=  [%x %y %z]    (parse-neet (read "[x y z]"))
+  ?>  .=  [[%x %y] %z]  (parse-neet (read "[[x y] z]"))
   ~|  t+%fst
-  ?>  .=  40       (run-tape "((fn (x y) x) (cons 40 2))")
+  ?>  .=  40       (run-tape "((fn [x y] x) (cons 40 2))")
   ~|  t+%snd
-  ?>  .=  2        (run-tape "((fn (x y) y) (cons 40 2))")
+  ?>  .=  2        (run-tape "((fn [x y] y) (cons 40 2))")
   ~|  t+'destructuring let'
-  ?>  .=  5        (run-tape "(let (x y z) (lit 3 4 5) z)")
+  ?>  .=  5        (run-tape "(let [x y z] (lit 3 4 5) z)")
   ~|  t+'parallel let'
-  ?>  .=  [2 40]   (run-tape "(let (x y) (cons 40 2) (cons y x))")
+  ?>  .=  [2 40]   (run-tape "(let [x y] (cons 40 2) (cons y x))")
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "(lit 40 2)")
   ?>  .=  [40 2]   (run-tape "(lit (40 2))")
