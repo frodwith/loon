@@ -426,7 +426,7 @@
            ?:  =(i dex.e)  f
            $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
-    %edit  [10 [axe.e $(e tgt.e)] $(e val.e)]
+    %edit  [10 [axe.e $(e val.e)] $(e tgt.e)]
     %litn  [1 val.e]
     %deep  [3 $(e val.e)]
     %bump  [4 $(e atm.e)]
@@ -544,6 +544,9 @@
       (compile-tape "[40 2]")
   ?>  .=  [40 2]
       (run-tape "(let x 40 (let y 2 [x y]))")
+  ~|  t+%edit
+  ?>  .=  [1 42 3]
+      (run-tape "(edit 6 [1 2 3] 42)")
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
@@ -595,8 +598,24 @@
 """
   ?>  =(0 .*(42 even))
   ?>  =(1 .*(42 odd))
-  ::  next up: add split
-  ::  (split foo [[_ x] _] x)
+  ~|  t+"ffi"
+  =/  fact-module  %-  run-tape
+::  XX - it would be nice if the application form longer than 2
+::  made a tuple out of the argument
+"""
+(dfn [lth mul dec]
+ (let slam (fn [cor sam] (nock (edit 6 cor sam) [9 2 0 1]))
+   (letrec
+     (fac (fn n
+            (if (slam [lth n 2])
+              1
+              (slam [mul n (fac (slam [dec n]))]))))
+     (dfn n (fac n)))))
+"""
+  ?>  .=  120
+      .*  5
+      .*  [lth mul dec]
+      fact-module
   %ok
 ==
 ==
