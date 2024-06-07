@@ -208,6 +208,12 @@
   ?.  &(?=([%litn *] a) ?=([%litn *] b))
     [%cons a b]
   [%litn val.a val.b]
+++  massage-args
+  |=  arg=(list sexp)
+  ^-  sexp
+  ?~  arg  ~|('empty argument list' !!)
+  ?~  t.arg  i.arg
+  [%sqar arg]
 ++  parse
   |=  e=sexp
   ^-  user
@@ -228,11 +234,11 @@
     =*  l  +.e
     =/  op  &1.l
     ?.  ?=([%sym *] op)
-      ?>  =(2 (lent l))
-      [%appl $(e op) $(e &2.l)]
+      ?>  (gth (lent l) 1)
+      [%appl $(e op) $(e (massage-args +.l))]
     ?+  +.op  ~|  l
-              ?>  =(2 (lent l))
-              [%appl +.op $(e &2.l)]
+              ?>  (gth (lent l) 1)
+              [%appl +.op $(e (massage-args +.l))]
         %frag
       ?>  =(3 (lent l))
       =/  axe  &2.l
@@ -540,6 +546,11 @@
   ?>  .=  [3 1 2]
     %-  run-tape
     "(let x [1 2 3] (bind x [a b c] [c a b]))"
+  ~|  t+%args
+  ::  you may omit the brackets for cell args just like hoon
+  ?>  .=  [0 42]
+      %-  run-tape
+      "((fn x x) 0 42)"
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "[40 2]")
   ::  punk special characters inside lits must be hard quoted
@@ -622,9 +633,9 @@
  (let slam (fn [cor sam] (nock (edit 6 cor sam) [9 2 0 1]))
    (letrec
      (fac (fn n
-            (if (slam [lth n 2])
+            (if (slam lth n 2)
               1
-              (slam [mul n (fac (slam [dec n]))]))))
+              (slam mul n (fac (slam dec n))))))
      (dfn n (fac n)))))
 """
   ?>  .=  120
