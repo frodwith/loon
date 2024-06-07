@@ -426,6 +426,9 @@
            ?:  =(i dex.e)  f
            $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
+    ::  whenever input can determine the head of a cell,
+    ::  like the axis of our edit here, we must hard quote it
+    ::  to prevent punk from seeing it as an operator
     %edit  [10 [['\'' axe.e] $(e val.e)] $(e tgt.e)]
     %litn  [1 '\'' val.e]
     %deep  [3 $(e val.e)]
@@ -438,8 +441,8 @@
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
     %nock  [2 $(e arg.e) $(e del.e)]
-    %sint  [11 tag.e $(e exp.e)]
-    %dint  [11 [tag.e $(e clu.e)] $(e exp.e)]
+    %sint  [11 ['\'' tag.e] $(e exp.e)]
+    %dint  [11 [['\'' tag.e] $(e clu.e)] $(e exp.e)]
   ==
 ++  user-to-nock
   |=  e=user
@@ -558,6 +561,9 @@
   ?>  .=  [[1 2 [[3 4] 5]] 6]
       .*  [[1 2 [[13 4] 5]] 6]
       (run-tape "(dfn x (edit 44 x 3))")
+  ~|  t+%hints
+  ?>  .=  42  (run-tape "(sint 44 42)")
+  ?>  .=  42  (run-tape "(dint 44 0 42)")
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
