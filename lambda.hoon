@@ -427,7 +427,7 @@
            $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
     %edit  [10 [['\'' axe.e] $(e val.e)] $(e tgt.e)]
-    %litn  [1 val.e]
+    %litn  [1 '\'' val.e]
     %deep  [3 $(e val.e)]
     %bump  [4 $(e atm.e)]
     %same  [5 $(e a.e) $(e b.e)]
@@ -539,6 +539,8 @@
     "(let x [1 2 3] (bind x [a b c] [c a b]))"
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "[40 2]")
+  ::  punk special characters inside lits must be hard quoted
+  ?>  .=  [44 0 1]  (run-tape "[44 0 1]")
   ~|  t+%sqar
   ?>  .=  [1 40 2]
       (compile-tape "[40 2]")
