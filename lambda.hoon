@@ -277,9 +277,16 @@
       ?>  =(3 (lent l))
       [%nock $(e &2.l) $(e &3.l)]
         %fn
-      ?>  =(3 (lent l))
-      =/  arg  &2.l
-      [%lamb (parse-neet arg) $(e &3.l)]
+      =/  len  (lent l)
+      ?+  len  ~|("fn has {<len>} args" !!)
+        %3  [%lamb (parse-neet &2.l) $(e &3.l)]
+        %4  =/  nex  &2.l
+            ?>  ?=([%sym *] nex)
+            =*  nam  +.nex
+            :+  %letr
+              [~ nam %lamb (parse-neet &3.l) $(e &4.l)]
+            nam
+      ==
         %dfn
       ?>  =(3 (lent l))
       =/  arg  &2.l
@@ -585,9 +592,12 @@
     ~|([t+%dec (cram !>((compile-tape dec-src)))] !!)
   ~|  t+%letrec
   ?>  =(42 (run-tape "(letrec (x 42) x)"))
-  ~|  t+%'close your eyes, make a wish...'
+  ~|  t+%'hold your breath, make a wish...'
   ?>  .=  3  %-  run-tape
     "(letrec (loop (fn x (if (same x 3) x (loop (bump x))))) (loop 1))"
+  ~|  t+%'count to three, with sugar'
+  ?>  .=  3  %-  run-tape
+    "((fn loop x (if (same x 3) x (loop (bump x)))) 1)"
   =/  lrdec-src=tape
     "(let dec (fn n (letrec (loop (fn i (let up (bump i) (if (same up n) i (loop up))))) (loop 0))) (dec 43))"
   ?.  =(42 (run-tape lrdec-src))
@@ -597,14 +607,11 @@
   =/  ddec  %-  run-tape
 """
 (dfn n
- (letrec
-  (loop
-   (fn i
-    (let up (bump i)
-     (if (same up n)
-      i
-      (loop up)))))
-  (loop 0)))
+ ((fn loop i
+   (let up (bump i)
+    (if (same up n)
+     i
+     (loop up)))) 0))
 """
   ?>  =(42 .*(43 ddec))
 ::  this "module" "imports" dec (by taking it as an argument)
@@ -631,12 +638,12 @@
 """
 (dfn [lth mul dec]
  (let slam (fn [cor sam] (nock (edit 6 cor sam) [9 2 0 1]))
-   (letrec
-     (fac (fn n
-            (if (slam lth n 2)
-              1
-              (slam mul n (fac (slam dec n))))))
-     (dfn n (fac n)))))
+  (dfn n
+   ((fn fac n
+     (if (slam lth n 2)
+      1
+      (slam mul n (fac (slam dec n)))))
+    n))))
 """
   ?>  .=  120
       .*  5
