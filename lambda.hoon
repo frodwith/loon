@@ -59,6 +59,7 @@
       [%bind var=@t to=neet in=user]
       [%letr g=raph in=user]
       [%lamb arg=neet bod=user]
+      [%recl nam=@t arg=neet bod=user]
       [%appl lam=user arg=user]
       [%delt arg=neet bod=user]
       [%nock arg=user del=user]
@@ -282,10 +283,7 @@
         %3  [%lamb (parse-neet &2.l) $(e &3.l)]
         %4  =/  nex  &2.l
             ?>  ?=([%sym *] nex)
-            =*  nam  +.nex
-            :+  %letr
-              [~ nam %lamb (parse-neet &3.l) $(e &4.l)]
-            nam
+            [%recl +.nex (parse-neet &3.l) $(e &4.l)]
       ==
         %dfn
       ?>  =(3 (lent l))
@@ -417,6 +415,7 @@
            =.  g  [[%core n i.g] t.g]
            [%letr $(e u) $(e in.e)]
     %lamb  [%lamb $(e bod.e, g (extend-neet g arg.e))]
+    %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
     %appl  [%appl $(e lam.e) $(e arg.e)]
     %delt  [%delt $(e bod.e, g [(neet-to-bind arg.e) g])]
     %nock  [%nock $(e arg.e) $(e del.e)]
