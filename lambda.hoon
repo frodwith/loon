@@ -426,7 +426,7 @@
            ?:  =(i dex.e)  f
            $(i +(i), f [',' f])
     %frag  [7 $(e of.e) 0 axe.e]
-    %edit  [10 [axe.e $(e val.e)] $(e tgt.e)]
+    %edit  [10 [['\'' axe.e] $(e val.e)] $(e tgt.e)]
     %litn  [1 val.e]
     %deep  [3 $(e val.e)]
     %bump  [4 $(e atm.e)]
@@ -547,6 +547,15 @@
   ~|  t+%edit
   ?>  .=  [1 42 3]
       (run-tape "(edit 6 [1 2 3] 42)")
+  ::  axis ',' (44) tests a corner of punk
+  ::  so first make sure its sibling works
+  ?>  .=  [[1 2 [[3 4] 5]] 6]
+      .*  [[1 2 [[3 13] 5]] 6]
+      (run-tape "(dfn x (edit 45 x 4))")
+  ::  now if we haven't quoted edit properly, this will fail
+  ?>  .=  [[1 2 [[3 4] 5]] 6]
+      .*  [[1 2 [[13 4] 5]] 6]
+      (run-tape "(dfn x (edit 44 x 3))")
   ~|  t+%id
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
@@ -600,8 +609,6 @@
   ?>  =(1 .*(42 odd))
   ~|  t+"ffi"
   =/  fact-module  %-  run-tape
-::  XX - it would be nice if the application form longer than 2
-::  made a tuple out of the argument
 """
 (dfn [lth mul dec]
  (let slam (fn [cor sam] (nock (edit 6 cor sam) [9 2 0 1]))
