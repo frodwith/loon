@@ -25,6 +25,9 @@
 +$  toke-state
   $@  ~
   [?(%sym %num) (list @t)]
++$  tram
+  $@  @t
+  [%cell n=@t l=tram r=tram]
 +$  neet
   $@  @t
   [p=neet q=neet]
@@ -176,6 +179,38 @@
       ?<  ?=(~ t.stk)  ::  would be %top
       $(stk t.stk(q.i [sqar+(flop q.i.stk) q.i.t.stk]))
     ==
+  ==
+++  tram-sqar
+  |=  l=(list sexp)
+  ^-  (unit [tram tram])
+  ?~  l    ~
+  ?~  t.l  ~
+  =/  hed  (parse-tram i.l)
+  ?~  hed  ~
+  =/  l=(lest sexp)  t.l
+  =-  ?~  -  ~
+      `[u.hed u]
+  |-  ^-  (unit tram)
+  =/  one  (parse-tram i.l)
+  ?~  one  ~
+  ?~  t.l  one
+  =/  mor  $(l t.l)
+  ?~  mor  ~
+  `[%cell %$ u.one u.mor]
+++  parse-tram
+  |=  e=sexp
+  ^-  (unit tram)
+  ?+  e  ~
+      [%sym *]
+    `+.e
+      [%sqar *]
+    =/  sq  (tram-sqar +.e)
+    ?~  sq  ~
+    `[%cell %$ u.sq]
+      [%rond [%sym @] [%sqar *] ~]
+    =/  sq  (tram-sqar +.i.t.+.e)
+    ?~  sq  ~
+    `[%cell +.i.+.e u.sq]
   ==
 ++  parse-neet
   |=  e=sexp
@@ -514,6 +549,20 @@
   ?>  .=  [%x %y]       (parse-neet (read "[x y]"))
   ?>  .=  [%x %y %z]    (parse-neet (read "[x y z]"))
   ?>  .=  [[%x %y] %z]  (parse-neet (read "[[x y] z]"))
+  ~|  t+'tram parse'
+  =/  ptr  |=(a=tape (parse-tram (read a)))
+  ?>  .=  `%x
+      (ptr "x")
+  ?>  .=  `[%cell %$ %x %y]
+      (ptr "[x y]")
+  ?>  .=  `[%cell %$ %x %cell %$ %y %z]
+      (ptr "[x y z]")
+  ?>  .=  `[%cell %$ [%cell %$ %x %y] %z]
+      (ptr "[[x y] z]")
+  ?>  .=  `[%cell %foo [%cell %bar %x %y] %z]
+      (ptr "(foo [(bar [x y]) z])")
+  ?>  =(~ (ptr "(foo x)"))
+  ?>  =(~ (ptr "(foo (bar [x y]))"))
   ~|  t+%fst
   ?>  .=  40       (run-tape "((fn [x y] x) [40 2])")
   ~|  t+%snd
