@@ -430,7 +430,7 @@
     ^      [$(e p.e) $(e q.e)]
     %name  =/  f=*
              ?@  how.e  [0 how.e]
-             [9 arm.how.e 0 rec.how.e]
+             [9 ['\'' arm.how.e] 0 rec.how.e]
            ?:  =(0 dex.e)  f
            :-  1
            =|  i=@
@@ -578,6 +578,7 @@
   ?>  .=  [[1 2 [[3 4] 5]] 6]
       .*  [[1 2 [[13 4] 5]] 6]
       (run-tape "(dfn x (edit 44 x 3))")
+  ::  XX we should have a test for pulling axis 44, but don't yet
   ~|  t+%hints
   ?>  .=  42  (run-tape "(sint 44 42)")
   ?>  .=  42  (run-tape "(dint 44 0 42)")
