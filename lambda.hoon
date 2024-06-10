@@ -123,6 +123,8 @@
     $(out [%'[' (tok-fin st out)], st ~)
   ?:  =(']' c)
     $(out [%']' (tok-fin st out)], st ~)
+  ?:  =('_' c)
+    $(out [[%sym %$] (tok-fin st out)], st ~)
   ?:  |(=(' ' c) =('\0a' c))
     $(out (tok-fin st out), st ~)
   ?:  &((gte c 'a') (lte c 'z'))
@@ -368,6 +370,7 @@
   =|  g=gamma
   |-  ^-  core
   ?@  e
+    ?~  e  ~|("empty symbol (_) in variable position" !!)
     =/  p=path  (gamma-find g e)
     ?~  p  ~|("unbound name {<e>}" !!)
     [%name del.p +>.p]
@@ -527,8 +530,10 @@
   ?>  =(~ (ptr "(foo (bar [x y]))"))
   ~|  t+%fst
   ?>  .=  40       (run-tape "((fn [x y] x) [40 2])")
+  ?>  .=  40       (run-tape "((fn [x _] x) [40 2])")
   ~|  t+%snd
   ?>  .=  2        (run-tape "((fn [x y] y) [40 2])")
+  ?>  .=  2        (run-tape "((fn [_ y] y) [40 2])")
   ~|  t+'destructuring let'
   ?>  .=  5        (run-tape "(let [x y z] [3 4 5] z)")
   ?>  .=   [3 4 5 [4 5] 3 4 5]
