@@ -27,7 +27,7 @@
   [?(%sym %num) (list @t)]
 +$  tram
   $@  @t
-  [%cell n=@t l=tram r=tram]
+  [n=@t l=tram r=tram]
 +$  neet
   $@  @t
   [p=neet q=neet]
@@ -195,7 +195,7 @@
   ?~  t.l  one
   =/  mor  $(l t.l)
   ?~  mor  ~
-  `[%cell %$ u.one u.mor]
+  `[%$ u.one u.mor]
 ++  parse-tram
   |=  e=sexp
   ^-  (unit tram)
@@ -205,7 +205,7 @@
       [%sqar *]
     =/  sq  (tram-sqar +.e)
     ?~  sq  ~
-    `[%cell %$ u.sq]
+    `[%$ u.sq]
       [%rond [%sym @] * *]
     =/  cel=(unit [tram tram])
       =*  mor  t.e
@@ -214,7 +214,7 @@
         (tram-sqar +.i.mor)
       (tram-sqar mor)  :: "insert" square
     ?~  cel  ~
-    `[%cell +.i.+.e u.cel]
+    `[+.i.+.e u.cel]
   ==
 ++  parse-raph
   |=  e=sexp
@@ -320,12 +320,6 @@
       [%dint tag $(e &3.l) $(e &4.l)]
     ==
   ==
-++  one-of
-  |=  [n=@t l=(list @t)]
-  ^-  ?
-  ?~  l  |
-  ?:  =(n i.l)  &
-  $(l t.l)
 ++  bond-delv
   =/  axe=@  1
   |=  [b=bond n=@t]
@@ -359,10 +353,15 @@
   ?.  ?=(~ u)  [del u]
   ?~  t.g    ~
   $(g t.g, del +(del))
+++  tram-to-bond
+  |=  t=tram
+  ^-  bond
+  ?@  t  t
+  [%cell n.t $(t l.t) $(t r.t)]
 ++  extend-tram
   |=  [g=gamma t=tram]
-  %-  gamma
-  [[%cell ~ t i.g] t.g]
+  ^-  gamma
+  [[%cell %$ (tram-to-bond t) i.g] t.g]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
@@ -393,7 +392,7 @@
     %lamb  [%lamb $(e bod.e, g (extend-tram g arg.e))]
     %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, g [arg.e g])]
+    %delt  [%delt $(e bod.e, g [(tram-to-bond arg.e) g])]
     %nock  [%nock $(e arg.e) $(e del.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
@@ -514,13 +513,13 @@
   =/  ptr  |=(a=tape (parse-tram (read a)))
   ?>  .=  `%x
       (ptr "x")
-  ?>  .=  `[%cell %$ %x %y]
+  ?>  .=  `[%$ %x %y]
       (ptr "[x y]")
-  ?>  .=  `[%cell %$ %x %cell %$ %y %z]
+  ?>  .=  `[%$ %x %$ %y %z]
       (ptr "[x y z]")
-  ?>  .=  `[%cell %$ [%cell %$ %x %y] %z]
+  ?>  .=  `[%$ [%$ %x %y] %z]
       (ptr "[[x y] z]")
-  ?>  .=  `[%cell %foo [%cell %bar %x %y] %z]
+  ?>  .=  `[%foo [%bar %x %y] %z]
       (ptr "(foo [(bar [x y]) z])")
   ?>  =(~ (ptr "(foo x)"))
   ?>  =(~ (ptr "(foo (bar [x y]))"))
