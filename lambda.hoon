@@ -206,10 +206,15 @@
     =/  sq  (tram-sqar +.e)
     ?~  sq  ~
     `[%cell %$ u.sq]
-      [%rond [%sym @] [%sqar *] ~]
-    =/  sq  (tram-sqar +.i.t.+.e)
-    ?~  sq  ~
-    `[%cell +.i.+.e u.sq]
+      [%rond [%sym @] * *]
+    =/  cel=(unit [tram tram])
+      =*  mor  t.e
+      ?~  t.mor  :: if there's only one more thing, must be square
+        ?.  ?=([%sqar *] i.mor)  ~
+        (tram-sqar +.i.mor)
+      (tram-sqar mor)  :: "insert" square
+    ?~  cel  ~
+    `[%cell +.i.+.e u.cel]
   ==
 ++  parse-raph
   |=  e=sexp
@@ -525,6 +530,12 @@
   ?>  .=  2        (run-tape "((fn [x y] y) [40 2])")
   ~|  t+'destructuring let'
   ?>  .=  5        (run-tape "(let [x y z] [3 4 5] z)")
+  ?>  .=   [3 4 5 [4 5] 3 4 5]
+      %-  run-tape
+      "(let (foo [x (bar [y z])]) [3 4 5] [x y z bar foo])"
+  ?>  .=   [3 4 5 [4 5] 3 4 5]
+      %-  run-tape
+      "(let (foo x (bar y z)) [3 4 5] [x y z bar foo])"
   ~|  t+'parallel let'
   ?>  .=  [2 40]   (run-tape "(let [x y] [40 2] [y x])")
   ~|  t+%args
