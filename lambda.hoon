@@ -31,11 +31,10 @@
 +$  neet
   $@  @t
   [p=neet q=neet]
-+$  bind
-  $~  leaf+~
-  $%  [%leaf ns=(list @)]
-      [%cell ns=(list @) l=bind r=bind]
-      [%core bat=neet pay=bind]
++$  bond
+  $@  @t
+  $%  [%cell n=@t l=bond r=bond]
+      [%core bat=neet pay=bond]
   ==
 +$  fond
   $?  [%leg leg=@]
@@ -43,7 +42,7 @@
   ==
 +$  fund  $@(~ fond)
 +$  path  $@(~ [del=@ f=fond])
-+$  gamma  (lest bind)
++$  gamma  (lest bond)
 +$  raph
   $^  [p=raph q=raph]
   [~ nam=@t exp=user]
@@ -58,12 +57,12 @@
       [%deep val=user]
       [%same a=user b=user]
       [%cond t=user y=user n=user]
-      [%letn nam=neet val=user in=user]
+      [%letn nam=tram val=user in=user]
       [%letr g=raph in=user]
-      [%lamb arg=neet bod=user]
-      [%recl nam=@t arg=neet bod=user]
+      [%lamb arg=tram bod=user]
+      [%recl nam=@t arg=tram bod=user]
       [%appl lam=user arg=user]
-      [%delt arg=neet bod=user]
+      [%delt arg=tram bod=user]
       [%nock arg=user del=user]
       [%sint tag=@ exp=user]
       [%dint tag=@ clu=user exp=user]
@@ -212,20 +211,6 @@
     ?~  sq  ~
     `[%cell +.i.+.e u.sq]
   ==
-++  parse-neet
-  |=  e=sexp
-  ^-  neet
-  ?@  e  ~|("number in binding tree {<e>}" !!)
-  ?-  -.e
-    %sym   +.e
-    %rond  ~|('parens in binding tree' !!)
-    %sqar  ?~  +.e  ~|("empty binding tree" !!)
-           =/  l=(lest sexp)  +.e
-           |-  ^-  neet
-           =/  h  ^$(e i.l)
-           ?~  t.l  h
-           [h $(l t.l)]
-  ==
 ++  parse-raph
   |=  e=sexp
   ?>  ?=([%rond *] e)
@@ -299,7 +284,7 @@
         %let
       ?>  =(4 (lent l))
       =/  nam  &2.l
-      [%letn (parse-neet nam) $(e &3.l) $(e &4.l)]
+      [%letn (need (parse-tram nam)) $(e &3.l) $(e &4.l)]
         %letrec
       ?>  =(3 (lent l))
       [%letr (parse-raph &2.l) $(e &3.l)]
@@ -309,15 +294,15 @@
         %fn
       =/  len  (lent l)
       ?+  len  ~|("fn has {<len>} args" !!)
-        %3  [%lamb (parse-neet &2.l) $(e &3.l)]
+        %3  [%lamb (need (parse-tram &2.l)) $(e &3.l)]
         %4  =/  nex  &2.l
             ?>  ?=([%sym *] nex)
-            [%recl +.nex (parse-neet &3.l) $(e &4.l)]
+            [%recl +.nex (need (parse-tram &3.l)) $(e &4.l)]
       ==
         %dfn
       ?>  =(3 (lent l))
       =/  arg  &2.l
-      [%delt (parse-neet arg) $(e &3.l)]
+      [%delt (need (parse-tram arg)) $(e &3.l)]
         %sint
       ?>  =(3 (lent l))
       =/  tag  &2.l
@@ -336,20 +321,20 @@
   ?~  l  |
   ?:  =(n i.l)  &
   $(l t.l)
-++  bind-delv
+++  bond-delv
   =/  axe=@  1
-  |=  [b=bind n=@t]
+  |=  [b=bond n=@t]
   ^-  fund
-  ?-  -.b
-      %leaf
-    ?.  (one-of n ns.b)  ~
+  ?-  b
+      @
+    ?.  =(n b)  ~
     leg+axe
-      %cell
-    ?:  (one-of n ns.b)  leg+axe
+      [%cell *]
+    ?:  =(n n.b)  leg+axe
     =/  l  $(b l.b, axe (peg axe 2))
     ?.  ?=(~ l)  l
     $(b r.b, axe (peg axe 3))
-      %core
+      [%core *]
     =/  fib=fund  :: found in battery
       =/  arm=@  2
       =/  bat=neet  bat.b
@@ -365,37 +350,14 @@
   =|  del=@
   |=  [g=gamma n=@t]
   ^-  path
-  =/  u=fund   (bind-delv i.g n)
+  =/  u=fund   (bond-delv i.g n)
   ?.  ?=(~ u)  [del u]
   ?~  t.g    ~
   $(g t.g, del +(del))
-++  neet-to-bind
-  |=  n=neet
-  ^-  bind
-  ?@  n  [%leaf n ~]
-  [%cell ~ $(n p.n) $(n q.n)]
-++  extend-neet
-  |=  [g=gamma net=neet]
-  ^-  gamma
-  [[%cell ~ (neet-to-bind net) i.g] t.g]
-++  bind-neet
-  |=  [b=bind net=neet]
-  ^-  bind
-  ?@  net
-    ?+  -.b  !!
-      %cell  b(ns [net ns.b])
-      %leaf  b(ns [net ns.b])
-    ==
-  ?+  -.b  !!
-    %cell  %=  b
-             l  $(b l.b, net p.net)
-             r  $(b r.b, net q.net)
-           ==
-    %leaf  =/  n=neet  net
-           |-  ^-  bind
-           ?@  n  [%leaf n ~]
-           [%cell ~ $(n p.n) $(n q.n)]
-  ==
+++  extend-tram
+  |=  [g=gamma t=tram]
+  %-  gamma
+  [[%cell ~ t i.g] t.g]
 ++  user-to-core
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
@@ -414,7 +376,7 @@
     %deep  [%deep $(e val.e)]
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, g (extend-neet g nam.e))]
+    %letn  [%letn $(e val.e) $(e in.e, g (extend-tram g nam.e))]
     %letr  =+  =/  rap  g.e
                |-  ^-  [n=neet u=user]
                ?~  -.rap  +.rap
@@ -423,10 +385,10 @@
                [[n.l n.r] %cons u.l u.r]
            =.  g  [[%core n i.g] t.g]
            [%letr $(e u) $(e in.e)]
-    %lamb  [%lamb $(e bod.e, g (extend-neet g arg.e))]
+    %lamb  [%lamb $(e bod.e, g (extend-tram g arg.e))]
     %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
     %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, g [(neet-to-bind arg.e) g])]
+    %delt  [%delt $(e bod.e, g [arg.e g])]
     %nock  [%nock $(e arg.e) $(e del.e)]
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
@@ -543,12 +505,6 @@
   ?>  .=  [%rond 1 2 3 ~]          (read "(1 2 3)")
   ?>  .=  [%sqar 1 2 3 ~]          (read "[1 2 3]")
   ?>  .=  [%sqar 1 [%rond ~] 3 ~]  (read "[1 () 3]")
-  ~|  t+'neet parse'
-  ?>  .=  %x            (parse-neet (read "x"))
-  ?>  .=  %x            (parse-neet (read "[x]"))
-  ?>  .=  [%x %y]       (parse-neet (read "[x y]"))
-  ?>  .=  [%x %y %z]    (parse-neet (read "[x y z]"))
-  ?>  .=  [[%x %y] %z]  (parse-neet (read "[[x y] z]"))
   ~|  t+'tram parse'
   =/  ptr  |=(a=tape (parse-tram (read a)))
   ?>  .=  `%x
