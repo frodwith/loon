@@ -15,16 +15,20 @@
   $@  ?(%'(' %')' %'[' %']')
   $%  [%sym @t]
       [%num @]
+      [%tap tape]
+      [%cor cord]
   ==
 +$  sexp
   $@  @
   $%  [%sym @t]
+      [%tape tape]
+      [%cord cord]
       [%rond (list sexp)]
       [%sqar (list sexp)]
   ==
 +$  toke-state
   $@  ~
-  [?(%sym %num) (list @t)]
+  [?(%sym %num %tap %tae %cor %coe) (list @t)]
 +$  tram
   $@  @t
   [n=@t l=tram r=tram]
@@ -104,7 +108,7 @@
   |=  [st=toke-state out=(list token)]
   ^+  out
   ?@  st  out
-  ?-  -.st
+  ?+  -.st  ~|(%bad-fin !!)
     %sym  [[%sym (crip (flop +.st))] out]
     %num  [[%num (lsdectape +.st)] out]
   ==
@@ -115,6 +119,26 @@
   ?~  in  (flop (tok-fin st out))
   =+  [c at]=[i.in i]
   =>  .(in t.in, i +(i))
+  ?:  ?=([%tae *] st)
+    $(st [%tap c +.st])
+  ?:  ?=([%coe *] st)
+    $(st [%cor c +.st])
+  ?:  ?=([%tap *] st)
+    ?:  =('\\' c)
+      $(-.st %tae)
+    ?:  =('"' c)
+      $(out [tap+(flop +.st) out], st ~)
+    $(+.st [c +.st])
+  ?:  ?=([%cor *] st)
+    ?:  =('\\' c)
+      $(-.st %coe)
+    ?:  =('\'' c)
+      $(out [cor+(crip (flop +.st)) out], st ~)
+    $(+.st [c +.st])
+  ?:  =('\'' c)
+    $(st [%cor ~])
+  ?:  =('"' c)
+    $(st [%tap ~])
   ?:  =('(' c)
     $(out [%'(' (tok-fin st out)], st ~)
   ?:  =(')' c)
@@ -129,16 +153,12 @@
     $(out (tok-fin st out), st ~)
   ?:  &((gte c 'a') (lte c 'z'))
     ?@  st  $(st [%sym c ~])
-    ?-  -.st
-      %sym  $(st [%sym c +.st])
-      %num  ~|("unexpected letter '{<c>}' at char {<i>}." !!)
-    ==
+    ?>  ?=(%sym -.st)
+    $(st [%sym c +.st])
   ?:  &((gte c '0') (lte c '9'))
     ?@  st  $(st [%num c ~])
-    ?-  -.st
-      %sym  ~|("unexpected digit '{<c>}' at char {<i>}." !!)
-      %num  $(st [%num c +.st])
-    ==
+    ?>  ?=(%num -.st)
+    $(st [%num c +.st])
   ~|("unexpected character '{<c>}' at char {<i>}." !!)
 ++  read
   |=  in=tape
@@ -164,6 +184,10 @@
     $(q.i.stk [[%sym +.t] q.i.stk])
       [%num *]
     $(q.i.stk [+.t q.i.stk])
+      [%tap *]
+    $(q.i.stk [[%tape +.t] q.i.stk])
+      [%cor *]
+    $(q.i.stk [[%cord +.t] q.i.stk])
       %')'
     ?-  p.i.stk
         %top   ~|('unmatched closing paren' !!)
@@ -246,7 +270,12 @@
   ^-  user
   ?@  e  litn+e
   ?-  -.e
-      %sym  +.e
+      %sym
+    +.e
+      %tape
+    [%litn +.e]
+      %cord
+    [%litn +.e]
       %sqar
     =*  l  +.e
     ?~  l  ~|('empty brackets' !!)
@@ -551,6 +580,10 @@
       "((fn x x) 0 42)"
   ~|  t+%lits
   ?>  .=  [40 2]   (run-tape "[40 2]")
+  ?>  .=  "hello, world!"  (run-tape "\"hello, world!\"")
+  ?>  .=  'hello, world!'  (run-tape "'hello, world!'")
+  ?>  .=  "'"  (run-tape "\"'\"")
+  ?>  .=  '"'  (run-tape "'\"'")
   ::  punk special characters inside lits must be hard quoted
   ?>  .=  [44 0 1]  (run-tape "[44 0 1]")
   ~|  t+%sqar
