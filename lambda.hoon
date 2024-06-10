@@ -56,7 +56,6 @@
       [%same a=user b=user]
       [%cond t=user y=user n=user]
       [%letn nam=neet val=user in=user]
-      [%bind var=@t to=neet in=user]
       [%letr g=raph in=user]
       [%lamb arg=neet bod=user]
       [%recl nam=@t arg=neet bod=user]
@@ -266,11 +265,6 @@
       ?>  =(4 (lent l))
       =/  nam  &2.l
       [%letn (parse-neet nam) $(e &3.l) $(e &4.l)]
-        %bind
-      ?>  =(4 (lent l))
-      =/  var  &2.l
-      ?>  ?=([%sym *] var)
-      [%bind +.var (parse-neet &3.l) $(e &4.l)]
         %letrec
       ?>  =(3 (lent l))
       [%letr (parse-raph &2.l) $(e &3.l)]
@@ -386,26 +380,6 @@
     %same  [%same $(e a.e) $(e b.e)]
     %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
     %letn  [%letn $(e val.e) $(e in.e, g (extend-neet g nam.e))]
-    %bind  =/  p=path  (gamma-find g var.e)
-           ?~  p  ~|("unbound name {<var.e>}" !!)
-           ?:  ?=(%arm -.f.p)  ~|("{<var.e>} is letrec-bound" !!)
-           %=  $
-             e  in.e
-             g  |-  ^-  gamma  :: find the right delta level
-                ?.  =(0 del.p)
-                  ?~  t.g  !!  :: won't happen, already found
-                  :-  i.g
-                  $(del.p (dec del.p), g t.g)
-                :_  t.g
-                =+  [axe bin]=[leg.f.p i.g]
-                |-  ^-  bind   :: descend to the right axis
-                ?:  =(1 axe)  (bind-neet bin to.e)
-                ?>  ?=(%cell -.bin)
-                =/  hed  =(2 (cap axe))
-                =.  axe  (mas axe)
-                ?:  hed  bin(l $(bin l.bin))
-                bin(r $(bin r.bin))
-           ==
     %letr  =+  =/  rap  g.e
                |-  ^-  [n=neet u=user]
                ?~  -.rap  +.rap
@@ -548,10 +522,6 @@
   ?>  .=  5        (run-tape "(let [x y z] [3 4 5] z)")
   ~|  t+'parallel let'
   ?>  .=  [2 40]   (run-tape "(let [x y] [40 2] [y x])")
-  ~|  t+'bind'
-  ?>  .=  [3 1 2]
-    %-  run-tape
-    "(let x [1 2 3] (bind x [a b c] [c a b]))"
   ~|  t+%args
   ::  you may omit the brackets for cell args just like hoon
   ?>  .=  [0 42]
