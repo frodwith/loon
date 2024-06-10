@@ -22,7 +22,6 @@
   $@  @
   $%  [%sym @t]
       [%tape tape]
-      [%cord cord]
       [%rond (list sexp)]
       [%sqar (list sexp)]
   ==
@@ -184,10 +183,10 @@
     $(q.i.stk [[%sym +.t] q.i.stk])
       [%num *]
     $(q.i.stk [+.t q.i.stk])
+      [%cor *]
+    $(q.i.stk [+.t q.i.stk])
       [%tap *]
     $(q.i.stk [[%tape +.t] q.i.stk])
-      [%cor *]
-    $(q.i.stk [[%cord +.t] q.i.stk])
       %')'
     ?-  p.i.stk
         %top   ~|('unmatched closing paren' !!)
@@ -273,8 +272,6 @@
       %sym
     +.e
       %tape
-    [%litn +.e]
-      %cord
     [%litn +.e]
       %sqar
     =*  l  +.e
