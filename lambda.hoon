@@ -397,21 +397,23 @@
     %sint  [%sint tag.e $(e exp.e)]
     %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
   ==
+++  unq
+  |=  [dex=@ axe=@]
+  =/  f=*  [0 axe]
+  ?~  dex  f
+  :-  1
+  =|  i=@
+  |-  ^-  *
+  ?:  =(i dex)  f
+  $(i +(i), f [',' f])
 ++  core-to-punk
   |=  e=core
   ::  =-  ~&  [%core exp=e pro=-]  -
   ^-  *  ::  punk
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
-    %name  =/  f=*
-             ?@  how.e  [0 how.e]
-             [9 ['\'' arm.how.e] 0 rec.how.e]
-           ?:  =(0 dex.e)  f
-           :-  1
-           =|  i=@
-           |-  ^-  *
-           ?:  =(i dex.e)  f
-           $(i +(i), f [',' f])
+    %name  ?@  how.e  (unq dex.e how.e)
+           [9 ['\'' arm.how.e] (unq dex.e rec.how.e)]
     %frag  [7 $(e of.e) 0 axe.e]
     ::  whenever input can determine the head of a cell,
     ::  like the axis of our edit here, we must hard quote it
@@ -600,21 +602,15 @@
 """
   ?>  =(42 .*(43 ddec))
 ::  this "module" "imports" dec (by taking it as an argument)
-::  then it defines two mutually recursive functions, odd and evn
-::  they aren't dfns because then they would try to inline
-::  each other, sending the compiler into an infinite loop.
-::  they could be dfns if they could each inline the enclosing
-::  core instead, but we don't currently allow reference to the
-::  cores created by letrec (".").
-::  finally, it "exports" dfn wrappers around odd and evn.
+::  then it defines two mutually recursive dfns, odd and evn
+::  and returns them
   =+  ^=  [odd even]  .*  ddec  %-  run-tape
 """
 (dfn dec
  (letrec
-  ((odd (fn n (if (same 0 n) 1 (evn (nock n dec)))))
-   (evn (fn n (if (same 0 n) 0 (odd (nock n dec))))))
-  [(dfn n (odd n))
-   (dfn n (evn n))]))
+  ((odd (dfn n (if (same 0 n) 1 (nock (nock n dec) evn))))
+   (evn (dfn n (if (same 0 n) 0 (nock (nock n dec) odd)))))
+  [odd evn]))
 """
   ?>  =(0 .*(42 even))
   ?>  =(1 .*(42 odd))
