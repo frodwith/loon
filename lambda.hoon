@@ -696,7 +696,7 @@
   =/  fact-module  %-  run-tape
 """
 (dfn [lth mul dec]
- (let slam (fn [cor sam] (nock (edit 6 cor sam) [9 2 0 1]))
+ (let slam (fn [cor sam] (pull 2 (edit 6 cor sam)))
   (dfn n
    ((fn fac n
      (if (slam lth n 2)
