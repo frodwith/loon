@@ -62,7 +62,7 @@
       [%cond t=user y=user n=user]
       [%peer nam=tram at=user in=user]
       [%letn nam=tram val=user in=user]
-      [%letr g=raph in=user]
+      [%rlet g=raph in=user]
       [%lamb arg=tram bod=user]
       [%recl nam=@t arg=tram bod=user]
       [%appl lam=user arg=user]
@@ -86,7 +86,7 @@
       [%cond t=kern y=kern n=kern]
       [%peer at=kern in=kern]
       [%letn val=kern in=kern]
-      [%letr rec=kern in=kern]
+      [%rlet rec=kern in=kern]
       [%lamb bod=kern]
       [%appl lam=kern arg=kern]
       [%delt bod=kern]
@@ -337,7 +337,7 @@
       [%letn (need (parse-tram nam)) $(e &3.l) $(e &4.l)]
         %rlet
       ?>  =(3 (lent l))
-      [%letr (need (parse-raph &2.l)) $(e &3.l)]
+      [%rlet (need (parse-raph &2.l)) $(e &3.l)]
         %nock
       ?>  =(3 (lent l))
       [%nock $(e &2.l) $(e &3.l)]
@@ -453,10 +453,10 @@
       %peer  =/  at  $(e at.e)
              [%peer at $(e in.e, i.g (tram-to-bond nam.e))]
       %letn  [%letn $(e val.e) $(e in.e, g (extend-tram g nam.e))]
-      %letr  =^  k  g  (core g.e)
-             [%letr k $(e in.e)]  
+      %rlet  =^  k  g  (core g.e)
+             [%rlet k $(e in.e)]  
       %lamb  [%lamb $(e bod.e, g (extend-tram g arg.e))]
-      %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
+      %recl  $(e [%rlet [~ nam.e %lamb arg.e bod.e] nam.e])
       %appl  [%appl $(e lam.e) $(e arg.e)]
       %delt  [%delt $(e bod.e, g [(tram-to-bond arg.e) g])]
       %nock  [%nock $(e fol.e) $(e arg.e)]
@@ -495,7 +495,7 @@
     %cond  [6 $(e t.e) $(e y.e) $(e n.e)]
     %peer  [7 $(e at.e) $(e in.e)]
     %letn  [8 $(e val.e) $(e in.e)]
-    %letr  [8 [1 $(e rec.e)] $(e in.e)]
+    %rlet  [8 [1 $(e rec.e)] $(e in.e)]
     %lamb  [[1 $(e bod.e)] 0 1]
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
