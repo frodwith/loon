@@ -243,15 +243,23 @@
   ==
 ++  parse-raph
   |=  e=sexp
-  ?>  ?=([%rond *] e)
-  =/  es=(list sexp)  +.e
-  |-  ^-  raph
-  ?~  es    !!
-  ?~  t.es  ^$(e i.es)
-  ?:  ?=([%sym *] i.es)
-    ?>  ?=([* ~] t.es)
-    [~ +.i.es (parse i.t.es)]
-  [^$(e i.es) $(es t.es)]
+  ^-  (unit raph)
+  ?+  e  ~
+      [%rond [%sym *] * ~]
+    `[~ +<+.e (parse +>-.e)]
+      [%sqar * * *]
+    =/  top  $(e +<.e)
+    ?~  top  ~
+    =/  mor  t.+.e
+    =-  ?~(- ~ `[u.top u])
+    |-  ^-  (unit raph)
+    =/  hed  ^$(e i.mor)
+    ?~  hed  ~
+    ?~  t.mor  hed
+    =/  tal  $(mor t.mor)
+    ?~  tal  ~
+    `[u.hed u.tal]
+  ==
 ++  june
   |=  [a=user b=user]
   ^-  user
@@ -320,7 +328,7 @@
       [%letn (need (parse-tram nam)) $(e &3.l) $(e &4.l)]
         %letrec
       ?>  =(3 (lent l))
-      [%letr (parse-raph &2.l) $(e &3.l)]
+      [%letr (need (parse-raph &2.l)) $(e &3.l)]
         %nock
       ?>  =(3 (lent l))
       [%nock $(e &2.l) $(e &3.l)]
@@ -514,10 +522,9 @@
   (run-tape t)
     %test
   ~|  t+'raph parse'
-  ?>  .=  [~ %x %litn 12]  (parse-raph (read "(x 12)"))
-  ?>  .=  [~ %x %litn 12]  (parse-raph (read "((x 12))"))
-  ?>  .=  [[~ %x %litn 40] ~ %y %litn 2]
-      (parse-raph (read "((x 40) (y 2))"))
+  ?>  .=  `[~ %x %litn 12]  (parse-raph (read "(x 12)"))
+  ?>  .=  `[[~ %x %litn 40] ~ %y %litn 2]
+      (parse-raph (read "[(x 40) (y 2)]"))
   ~|  t+0
   ?>  .=  42
       .*  ~  (user-to-nock %appl [%lamb %a %a] %litn 42)
@@ -643,8 +650,8 @@
 """
 (dfn dec
  (letrec
-  ((odd (dfn n (if (same 0 n) 1 (nock (nock n dec) evn))))
-   (evn (dfn n (if (same 0 n) 0 (nock (nock n dec) odd)))))
+  [(odd (dfn n (if (same 0 n) 1 (nock (nock n dec) evn))))
+   (evn (dfn n (if (same 0 n) 0 (nock (nock n dec) odd))))]
   [odd evn]))
 """
   ?>  =(0 .*(42 even))
