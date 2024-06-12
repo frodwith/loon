@@ -67,28 +67,32 @@
       [%appl lam=user arg=user]
       [%delt arg=tram bod=user]
       [%nock arg=user del=user]
+      [%core g=raph]
+      [%pull axe=@ cor=user]
       [%sint tag=@ exp=user]
       [%dint tag=@ clu=user exp=user]
   ==
-+$  core
++$  kern
   $~  [%name 0 0]
-  $^  [p=core q=core]
+  $^  [p=kern q=kern]
   $%  [%name dex=@ how=$@(@ [rec=@ arm=@])]
-      [%frag axe=@ of=core]
-      [%edit axe=@ tgt=core val=core]
+      [%frag axe=@ of=kern]
+      [%edit axe=@ tgt=kern val=kern]
       [%litn val=*]
-      [%deep val=core]
-      [%bump atm=core]
-      [%same a=core b=core]
-      [%cond t=core y=core n=core]
-      [%letn val=core in=core]
-      [%letr rec=core in=core]
-      [%lamb bod=core]
-      [%appl lam=core arg=core]
-      [%delt bod=core]
-      [%nock arg=core del=core]
-      [%sint tag=@ exp=core]
-      [%dint tag=@ clu=core exp=core]
+      [%deep val=kern]
+      [%bump atm=kern]
+      [%same a=kern b=kern]
+      [%cond t=kern y=kern n=kern]
+      [%letn val=kern in=kern]
+      [%letr rec=kern in=kern]
+      [%lamb bod=kern]
+      [%appl lam=kern arg=kern]
+      [%delt bod=kern]
+      [%nock arg=kern del=kern]
+      [%core bat=kern]
+      [%pull axe=@ cor=kern]
+      [%sint tag=@ exp=kern]
+      [%dint tag=@ clu=kern exp=kern]
   ==
 --
 |%
@@ -344,6 +348,14 @@
       ?>  =(3 (lent l))
       =/  arg  &2.l
       [%delt (need (parse-tram arg)) $(e &3.l)]
+        %core
+      ?>  =(2 (lent l))
+      [%core (need (parse-raph &2.l))]
+        %pull
+      ?>  =(3 (lent l))
+      =/  axe=sexp  &2.l
+      ?>  ?=(@ axe)
+      [%pull axe $(e &3.l)]
         %sint
       ?>  =(3 (lent l))
       =/  tag  &2.l
@@ -398,42 +410,52 @@
   |=  [g=gamma t=tram]
   ^-  gamma
   [[%cell %$ (tram-to-bond t) i.g] t.g]
-++  user-to-core
+++  user-to-kern
   |=  e=user
   ::  =-  ~&  [%user exp=e pro=-]  -
   =|  g=gamma
-  |-  ^-  core
-  ?@  e
-    ?~  e  ~|("empty symbol (_) in variable position" !!)
-    =/  p=path  (gamma-find g e)
-    ?~  p  ~|("unbound name {<e>}" !!)
-    [%name del.p +>.p]
-  ?-  -.e
-    %cons  [$(e p.e) $(e q.e)]
-    %frag  [%frag axe.e $(e of.e)]
-    %edit  [%edit axe.e $(e tgt.e) $(e val.e)]
-    %litn  e
-    %bump  [%bump $(e atm.e)]
-    %deep  [%deep $(e val.e)]
-    %same  [%same $(e a.e) $(e b.e)]
-    %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
-    %letn  [%letn $(e val.e) $(e in.e, g (extend-tram g nam.e))]
-    %letr  =+  =/  rap  g.e
-               |-  ^-  [n=neet u=user]
-               ?~  -.rap  +.rap
-               =/  l  $(rap p.rap)
-               =/  r  $(rap q.rap)
-               [[n.l n.r] %cons u.l u.r]
-           =.  g  [[%core n i.g] t.g]
-           [%letr $(e u) $(e in.e)]
-    %lamb  [%lamb $(e bod.e, g (extend-tram g arg.e))]
-    %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
-    %appl  [%appl $(e lam.e) $(e arg.e)]
-    %delt  [%delt $(e bod.e, g [(tram-to-bond arg.e) g])]
-    %nock  [%nock $(e arg.e) $(e del.e)]
-    %sint  [%sint tag.e $(e exp.e)]
-    %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
-  ==
+  =<  $
+  |% 
+  ++  core
+    |=  rap=raph
+    ^-  [kern gamma]
+    =+  |-  ^-  [n=neet u=user]
+        ?~  -.rap  +.rap
+        =/  l  $(rap p.rap)
+        =/  r  $(rap q.rap)
+        [[n.l n.r] %cons u.l u.r]
+    =.  g  [[%core n i.g] t.g]
+    [^$(e u) g]
+  ++  $
+    ^-  kern
+    ?@  e
+      ?~  e  ~|("empty symbol (_) in variable position" !!)
+      =/  p=path  (gamma-find g e)
+      ?~  p  ~|("unbound name {<e>}" !!)
+      [%name del.p +>.p]
+    ?-  -.e
+      %cons  [$(e p.e) $(e q.e)]
+      %frag  [%frag axe.e $(e of.e)]
+      %edit  [%edit axe.e $(e tgt.e) $(e val.e)]
+      %litn  e
+      %bump  [%bump $(e atm.e)]
+      %deep  [%deep $(e val.e)]
+      %same  [%same $(e a.e) $(e b.e)]
+      %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
+      %letn  [%letn $(e val.e) $(e in.e, g (extend-tram g nam.e))]
+      %letr  =^  k  g  (core g.e)
+             [%letr k $(e in.e)]  
+      %lamb  [%lamb $(e bod.e, g (extend-tram g arg.e))]
+      %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
+      %appl  [%appl $(e lam.e) $(e arg.e)]
+      %delt  [%delt $(e bod.e, g [(tram-to-bond arg.e) g])]
+      %nock  [%nock $(e arg.e) $(e del.e)]
+      %core  [%core -:(core g.e)]
+      %pull  [%pull axe.e $(e cor.e)]
+      %sint  [%sint tag.e $(e exp.e)]
+      %dint  [%dint tag.e $(e clu.e) $(e exp.e)]
+    ==
+  --
 ++  unq
   |=  [dex=@ axe=@]
   =/  f=*  [0 axe]
@@ -443,9 +465,9 @@
   |-  ^-  *
   ?:  =(i dex)  f
   $(i +(i), f [',' f])
-++  core-to-punk
-  |=  e=core
-  ::  =-  ~&  [%core exp=e pro=-]  -
+++  kern-to-punk
+  |=  e=kern
+  ::  =-  ~&  [%kern exp=e pro=-]  -
   ^-  *  ::  punk
   ?-  -.e
     ^      [$(e p.e) $(e q.e)]
@@ -467,14 +489,16 @@
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
     %nock  [2 $(e arg.e) $(e del.e)]
+    %core  [[1 $(e bat.e)] 0 1]
+    %pull  [9 ['\'' axe.e] $(e cor.e)]
     %sint  [11 ['\'' tag.e] $(e exp.e)]
     %dint  [11 [['\'' tag.e] $(e clu.e)] $(e exp.e)]
   ==
 ++  user-to-nock
   |=  e=user
   %-  compile:punk
-  %-  core-to-punk
-  %-  user-to-core
+  %-  kern-to-punk
+  %-  user-to-kern
   e
 ++  tape-to-user
   |=  t=tape
