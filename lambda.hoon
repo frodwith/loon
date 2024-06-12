@@ -349,8 +349,11 @@
       =/  arg  &2.l
       [%delt (need (parse-tram arg)) $(e &3.l)]
         %core
-      ?>  =(2 (lent l))
-      [%core (need (parse-raph &2.l))]
+      =/  arg
+        ?:  =(2 (lent l))
+          &2.l
+        [%sqar +.l]
+      [%core (need (parse-raph arg))]
         %pull
       ?>  =(3 (lent l))
       =/  axe=sexp  &2.l
@@ -639,6 +642,15 @@
   ?>  .=  42       (run-tape "((fn x x) 42)")
   ~|  t+%nest
   ?>  .=  [40 2]   (run-tape "(((fn x (fn y [x y])) 40) 2)")
+  ~|  t+%pull
+  ?>  .=  42  .*  |.(42)
+      %-  run-tape
+      "(dfn trap (pull 2 trap))"
+  ?>  .=  [40 2]  %-  run-tape
+      "(let c (core [(_ 40) (_ 2)]) [(pull 4 c) (pull 5 c)])"
+  ?>  .=  [40 2]  %-  run-tape
+      ::  you can leave the outer [] off the shape for core
+      "(let c (core (_ 40) (_ 2)) [(pull 4 c) (pull 5 c)])"
   =/  dec-src=tape
     "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
   ?.  =(42 (run-tape dec-src))
