@@ -60,13 +60,14 @@
       [%deep val=user]
       [%same a=user b=user]
       [%cond t=user y=user n=user]
+      [%peer nam=tram at=user in=user]
       [%letn nam=tram val=user in=user]
       [%letr g=raph in=user]
       [%lamb arg=tram bod=user]
       [%recl nam=@t arg=tram bod=user]
       [%appl lam=user arg=user]
       [%delt arg=tram bod=user]
-      [%nock arg=user del=user]
+      [%nock fol=user arg=user]
       [%core g=raph]
       [%pull axe=@ cor=user]
       [%sint tag=@ exp=user]
@@ -83,12 +84,13 @@
       [%bump atm=kern]
       [%same a=kern b=kern]
       [%cond t=kern y=kern n=kern]
+      [%peer at=kern in=kern]
       [%letn val=kern in=kern]
       [%letr rec=kern in=kern]
       [%lamb bod=kern]
       [%appl lam=kern arg=kern]
       [%delt bod=kern]
-      [%nock arg=kern del=kern]
+      [%nock fol=kern arg=kern]
       [%core bat=kern]
       [%pull axe=@ cor=kern]
       [%sint tag=@ exp=kern]
@@ -326,6 +328,9 @@
         %if
       ?>  =(4 (lent l))
       [%cond $(e &2.l) $(e &3.l) $(e &4.l)]
+        %focus
+      ?>  =(4 (lent l))
+      [%peer (need (parse-tram &2.l)) $(e &3.l) $(e &4.l)]
         %let
       ?>  =(4 (lent l))
       =/  nam  &2.l
@@ -445,6 +450,8 @@
       %deep  [%deep $(e val.e)]
       %same  [%same $(e a.e) $(e b.e)]
       %cond  [%cond $(e t.e) $(e y.e) $(e n.e)]
+      %peer  =/  at  $(e at.e)
+             [%peer at $(e in.e, i.g (tram-to-bond nam.e))]
       %letn  [%letn $(e val.e) $(e in.e, g (extend-tram g nam.e))]
       %letr  =^  k  g  (core g.e)
              [%letr k $(e in.e)]  
@@ -452,7 +459,7 @@
       %recl  $(e [%letr [~ nam.e %lamb arg.e bod.e] nam.e])
       %appl  [%appl $(e lam.e) $(e arg.e)]
       %delt  [%delt $(e bod.e, g [(tram-to-bond arg.e) g])]
-      %nock  [%nock $(e arg.e) $(e del.e)]
+      %nock  [%nock $(e fol.e) $(e arg.e)]
       %core  [%core -:(core g.e)]
       %pull  [%pull axe.e $(e cor.e)]
       %sint  [%sint tag.e $(e exp.e)]
@@ -486,12 +493,13 @@
     %bump  [4 $(e atm.e)]
     %same  [5 $(e a.e) $(e b.e)]
     %cond  [6 $(e t.e) $(e y.e) $(e n.e)]
+    %peer  [7 $(e at.e) $(e in.e)]
     %letn  [8 $(e val.e) $(e in.e)]
     %letr  [8 [1 $(e rec.e)] $(e in.e)]
     %lamb  [[1 $(e bod.e)] 0 1]
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
-    %nock  [2 $(e arg.e) $(e del.e)]
+    %nock  [2 $(e arg.e) $(e fol.e)]
     %core  [[1 $(e bat.e)] 0 1]
     %pull  [9 ['\'' axe.e] $(e cor.e)]
     %sint  [11 ['\'' tag.e] $(e exp.e)]
@@ -565,11 +573,11 @@
   ~|  t+3
   ?>  .=  [42 63]  :: dfns can close over dexicals
       %-  run-tape
-      "(nock 63 (nock 42 (dfn x (dfn y [x y]))))"
+      "(nock (nock (dfn x (dfn y [x y])) 42) 63)"
   ~|  t+"literal nock formula"
   ?>  .=  42
       %-  run-tape
-      "(nock 41 [4 0 1])"
+      "(nock [4 0 1] 41)"
   ~|  t+'read'
   ?>  .=  [%rond 1 2 3 ~]          (read "(1 2 3)")
   ?>  .=  [%sqar 1 2 3 ~]          (read "[1 2 3]")
@@ -594,6 +602,11 @@
   ~|  t+%snd
   ?>  .=  2        (run-tape "((fn [x y] y) [40 2])")
   ?>  .=  2        (run-tape "((fn [_ y] y) [40 2])")
+  ~|  t+%focus
+  ::  i would have to mink to test erasure of bindings because
+  ::  compiler crashes on unbound variables
+  ::  so we just test that it compiles to 7 :)
+  ?>  .=  [7 [1 42] 0 1]  (compile-tape "(focus a 42 a)")
   ~|  t+'destructuring let'
   ?>  .=  5        (run-tape "(let [x y z] [3 4 5] z)")
   ?>  .=   [3 4 5 [4 5] 3 4 5]
@@ -686,8 +699,8 @@
 """
 (dfn dec
  (letrec
-  [(odd (dfn n (if (same 0 n) 1 (nock (nock n dec) evn))))
-   (evn (dfn n (if (same 0 n) 0 (nock (nock n dec) odd))))]
+  [(odd (dfn n (if (same 0 n) 1 (nock evn (nock dec n)))))
+   (evn (dfn n (if (same 0 n) 0 (nock odd (nock dec n)))))]
   [odd evn]))
 """
   ?>  =(0 .*(42 even))
