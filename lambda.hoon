@@ -335,7 +335,7 @@
       ?>  =(4 (lent l))
       =/  nam  &2.l
       [%letn (need (parse-tram nam)) $(e &3.l) $(e &4.l)]
-        %letrec
+        %rec
       ?>  =(3 (lent l))
       [%letr (need (parse-raph &2.l)) $(e &3.l)]
         %nock
@@ -665,19 +665,19 @@
       ::  you can leave the outer [] off the shape for core
       "(let c (core (_ 40) (_ 2)) [(pull 4 c) (pull 5 c)])"
   =/  dec-src=tape
-    "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn rec (fn i (let up (bump i) (if (same up n) i (rec up)))))) 0)) (dec 43)))"
+    "(let fix (fn exp (let a (fn f (exp (fn x ((f f) x)))) (a a))) (let dec (fn n ((fix (fn r (fn i (let up (bump i) (if (same up n) i (r up)))))) 0)) (dec 43)))"
   ?.  =(42 (run-tape dec-src))
     ~|([t+%dec (cram !>((compile-tape dec-src)))] !!)
-  ~|  t+%letrec
-  ?>  =(42 (run-tape "(letrec (x 42) x)"))
+  ~|  t+%rec
+  ?>  =(42 (run-tape "(rec (x 42) x)"))
   ~|  t+%'hold your breath, make a wish...'
   ?>  .=  3  %-  run-tape
-    "(letrec (loop (fn x (if (same x 3) x (loop (bump x))))) (loop 1))"
+    "(rec (loop (fn x (if (same x 3) x (loop (bump x))))) (loop 1))"
   ~|  t+%'count to three, with sugar'
   ?>  .=  3  %-  run-tape
     "((fn loop x (if (same x 3) x (loop (bump x)))) 1)"
   =/  lrdec-src=tape
-    "(let dec (fn n (letrec (loop (fn i (let up (bump i) (if (same up n) i (loop up))))) (loop 0))) (dec 43))"
+    "(let dec (fn n (rec (loop (fn i (let up (bump i) (if (same up n) i (loop up))))) (loop 0))) (dec 43))"
   ?.  =(42 (run-tape lrdec-src))
     ~|([t+%lrdec (cram !>((compile-tape lrdec-src)))] !!)
   ~&  (cram !>((compile-tape lrdec-src)))
@@ -698,7 +698,7 @@
   =+  ^=  [odd even]  .*  ddec  %-  run-tape
 """
 (dfn dec
- (letrec
+ (rec
   [(odd (dfn n (if (same 0 n) 1 (nock evn (nock dec n)))))
    (evn (dfn n (if (same 0 n) 0 (nock odd (nock dec n)))))]
   [odd evn]))
