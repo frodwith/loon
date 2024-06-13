@@ -49,6 +49,8 @@
 +$  raph
   $^  [p=raph q=raph]
   [~ nam=@t exp=user]
++$  prog
+  [arg=tram exp=user]
 +$  user
   $~  %a
   $@  @t
@@ -252,7 +254,7 @@
   ^-  (unit raph)
   ?+  e  ~
       [%rond [%sym *] * ~]
-    `[~ +<+.e (parse +>-.e)]
+    `[~ +<+.e (parse-user +>-.e)]
       [%sqar * * *]
     =/  top  $(e +<.e)
     ?~  top  ~
@@ -278,7 +280,16 @@
   ?~  arg  ~|('empty argument list' !!)
   ?~  t.arg  i.arg
   [%sqar arg]
-++  parse
+++  parse-prog
+  |=  e=sexp
+  ^-  prog
+  ?.  ?=([%rond [%sym %main] *] e)
+    [%$ (parse-user e)]
+  =*  l  +.e
+  ?>  =(3 (lent l))
+  :-  (need (parse-tram &2.l))
+  (parse-user &3.l)
+++  parse-user
   |=  e=sexp
   ^-  user
   ?@  e  litn+e
@@ -418,10 +429,12 @@
   |=  [g=gamma t=tram]
   ^-  gamma
   [[%cell %$ (tram-to-bond t) i.g] t.g]
+++  prog-to-kern
+  |=  pog=prog
+  (user-to-kern exp.pog [(tram-to-bond arg.pog) ~])
 ++  user-to-kern
-  |=  e=user
+  |=  [e=user g=gamma]
   ::  =-  ~&  [%user exp=e pro=-]  -
-  =|  g=gamma
   =<  $
   |% 
   ++  core
@@ -505,34 +518,33 @@
     %sint  [11 ['\'' tag.e] $(e exp.e)]
     %dint  [11 [['\'' tag.e] $(e clu.e)] $(e exp.e)]
   ==
-++  user-to-nock
-  |=  e=user
+++  prog-to-nock
+  |=  pog=prog
   %-  compile:punk
   %-  kern-to-punk
-  %-  user-to-kern
-  e
-++  tape-to-user
+  %-  prog-to-kern
+  pog
+++  tape-to-prog
   |=  t=tape
-  %-  parse
+  %-  parse-prog
   %-  read
   t
 ++  compile-tape
   |=  t=tape
-  %-  user-to-nock
-  %-  tape-to-user
+  %-  prog-to-nock
+  %-  tape-to-prog
   t
 ++  run-tape
   |=  t=tape
-  .*  ~  ::  the "default environment" is "empty"
-  (compile-tape t)
+  .*  ~  (compile-tape t)
 ++  cram
   |=  v=vase
   ~(ram re (sell v))
 ++  run-slog
   |=  t=tape
-  =/  u=user  (tape-to-user t)
-  ~&  user=(cram !>(u))
-  =/  n=*  (user-to-nock u)
+  =/  pog=prog  (tape-to-prog t)
+  ~&  prog=(cram !>(pog))
+  =/  n=*  (prog-to-nock pog)
   ~&  nock=(cram !>(n))
   .*(~ n)
 --
@@ -562,7 +574,7 @@
       (parse-raph (read "[(x 40) (y 2)]"))
   ~|  t+0
   ?>  .=  42
-      .*  ~  (user-to-nock %appl [%lamb %a %a] %litn 42)
+      .*  ~  (prog-to-nock %$ %appl [%lamb %a %a] %litn 42)
   ~|  t+1
   ?>  .=  42
       (lsdectape "24")
@@ -706,9 +718,9 @@
   ?>  =(0 .*(42 even))
   ?>  =(1 .*(42 odd))
   ~|  t+"ffi"
-  =/  fact-module  %-  run-tape
+  =/  fact-module  %-  compile-tape
 """
-(dfn [lth mul dec]
+(main [lth mul dec]
  (let slam (fn [cor sam] (pull 2 (edit 6 cor sam)))
   (dfn n
    ((fn fac n
