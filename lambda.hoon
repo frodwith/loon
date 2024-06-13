@@ -694,9 +694,9 @@
     ~|([t+%lrdec (cram !>((compile-tape lrdec-src)))] !!)
   ~&  (cram !>((compile-tape lrdec-src)))
   ~|  t+%odd
-  =/  ddec  %-  run-tape
+  =/  ddec  %-  compile-tape
 """
-(dfn n
+(main n
  ((fn loop i
    (let up (bump i)
     (if (same up n)
@@ -707,9 +707,9 @@
 ::  this "module" "imports" dec (by taking it as an argument)
 ::  then it defines two mutually recursive dfns, odd and evn
 ::  and returns them
-  =+  ^=  [odd even]  .*  ddec  %-  run-tape
+  =+  ^=  [odd even]  .*  ddec  %-  compile-tape
 """
-(dfn dec
+(main dec
  (rlet
   [(odd (dfn n (if (same 0 n) 1 (nock evn (nock dec n)))))
    (evn (dfn n (if (same 0 n) 0 (nock odd (nock dec n)))))]
