@@ -11,12 +11,48 @@
 ::      It is legal to delta apply a noun (see the nock spec for semantics).
 ::  we compile to nock through punk, the quasiquote-nock.
 |%
-+$  token :: XX: add position info
++$  token
   $@  ?(%'(' %')' %'[' %']')
   $%  [%sym @t]
       [%num @]
       [%tap tape]
       [%cor cord]
+  ==
++$  sloc  [lin=@ col=@]
++$  noken  [tok=token loc=sloc]
++$  noke-state
+  $@  ~
+  [?(%sym %num %tap %tae %cor %coe) beg=sloc pen=(list @t)]
++$  noke-err
+  $:  chr=@tD
+      loc=sloc
+  ==
++$  parse-err
+  $:  tag=?(%empty-tram %single-tram %bad-tram)
+      loc=sloc
+  ==
++$  read-nokens-err
+  $@  ?(%none %many)
+  $%  [%pope loc=sloc]
+      [%bope loc=sloc]
+      [%clop loc=sloc]
+      [%clob loc=sloc]
+      [%cbwp b=sloc p=sloc]
+      [%cpwb p=sloc b=sloc]
+  ==
++$  toke-state
+  $@  ~
+  [?(%sym %num %tap %tae %cor %coe) (list @t)]
+
++$  nexp
+  $:  $=  exp
+      $@  @
+      $%  [%sym @t]
+          [%tape tape]
+          [%rond (list nexp)]
+          [%sqar (list nexp)]
+      ==
+      loc=sloc
   ==
 +$  sexp
   $@  @
@@ -25,9 +61,6 @@
       [%rond (list sexp)]
       [%sqar (list sexp)]
   ==
-+$  toke-state
-  $@  ~
-  [?(%sym %num %tap %tae %cor %coe) (list @t)]
 +$  tram
   $@  @t
   [n=@t l=tram r=tram]
@@ -100,6 +133,12 @@
   ==
 --
 |%
+++  boof
+  |*  [g=(each) f=$-(* (each))]
+  ?-  -.g
+    %&  (f p.g)
+    %|  g
+  ==
 ++  lsdectape
   |=  in=tape
   =|  out=@
@@ -111,6 +150,82 @@
     plc  (mul 10 plc)
     out  (add out (mul plc (sub i.in '0')))
   ==
+++  nok-fin
+  |=  [st=noke-state out=(list noken)]
+  ^+  out
+  ?@  st  out
+  ?+  -.st  ~|(%nok-fin !!)  ::  program bug
+    %sym  [[[%sym (crip (flop pen.st))] beg.st] out]
+    %num  [[[%num (lsdectape pen.st)] beg.st] out]
+  ==
+++  print-noke-err
+  |=  e=noke-err
+  ~&  e
+  ^-  tape
+  "unexpected {<chr.e>} at line {<lin.loc.e>} col {<col.loc.e>}."
+++  nokenize
+  |=  in=tape
+  =/  [loc=sloc st=noke-state out=(list noken)]
+    [[1 1] ~ ~]
+  |-  ^-  (each _out noke-err)
+  ?~  in  &+(flop (nok-fin st out))
+  =+  [c at]=[i.in loc]
+  =>  %=  .
+        in   t.in
+        loc  ?:  =(10 c)
+               [+(lin.loc) 1]
+             [lin.loc +(col.loc)]
+      ==
+  ::
+  ::  string escapes
+  ::
+  ?:  ?=([%tae *] st)
+    $(st [%tap beg.st c pen.st])
+  ?:  ?=([%coe *] st)
+    $(st [%cor beg.st c pen.st])
+  ::
+  ::  inside string literals
+  ::
+  ?:  ?=([%tap *] st)
+    ?:  =('\\' c)
+      $(-.st %tae)
+    ?:  =('"' c)
+      $(out [[[%tap (flop pen.st)] at] out], st ~)
+    $(pen.st [c pen.st])
+  ?:  ?=([%cor *] st)
+    ?:  =('\\' c)
+      $(-.st %coe)
+    ?:  =('\'' c)
+      $(out [[[%cor (crip (flop pen.st))] at] out], st ~)
+    $(pen.st [c pen.st])
+  ::
+  ::  normal char-at-a-time handling
+  ::
+  ?:  =('\'' c)
+    $(st [%cor at ~])
+  ?:  =('"' c)
+    $(st [%tap at ~])
+  ?:  =('(' c)
+    $(out [[%'(' at] (nok-fin st out)], st ~)
+  ?:  =(')' c)
+    $(out [[%')' at] (nok-fin st out)], st ~)
+  ?:  =('[' c)
+    $(out [[%'[' at] (nok-fin st out)], st ~)
+  ?:  =(']' c)
+    $(out [[%']' at] (nok-fin st out)], st ~)
+  ?:  =('_' c)
+    $(out [[[%sym %$] at] (nok-fin st out)], st ~)
+  ?:  |(=(' ' c) =(10 c))
+    $(out (nok-fin st out), st ~)
+  ?:  &((gte c 'a') (lte c 'z'))
+    ?@  st  $(st [%sym at c ~])
+    ?.  ?=(%sym -.st)  |+[c loc]
+    $(pen.st [c pen.st])
+  ?:  &((gte c '0') (lte c '9'))
+    ?@  st  $(st [%num at c ~])
+    ?.  ?=(%num -.st)  |+[c loc]
+    $(pen.st [c pen.st])
+  |+[c loc]
 ++  tok-fin
   |=  [st=toke-state out=(list token)]
   ^+  out
@@ -170,6 +285,55 @@
 ++  read
   |=  in=tape
   (read-tokens (tokenize in))
+++  read-nokens
+  |=  in=(list noken)
+  =/  stk=(lest [tag=?(%top %rond %sqar) beg=sloc kid=(list nexp)])
+    ~[top+[[0 0] ~]]
+  |-  ^-  (each nexp read-nokens-err)
+  ?~  in
+    ::  stack should have one item in it, or we left out a )]
+    ?.  ?=(~ t.stk)
+      :-  %|
+      ?-  tag.i.stk
+        %top   ~|(%read-nokens-bug !!)
+        %rond  pope+beg.i.stk
+        %sqar  bope+beg.i.stk
+      ==
+    ?~  kid.i.stk          |+%none
+    ?.  ?=(~ t.kid.i.stk)  |+%many
+    &+i.kid.i.stk
+  =/  t  i.in
+  =>  .(in t.in)
+  ?-  tok.t
+      %'('
+    $(stk [rond+[loc.t ~] stk])
+      %'['
+    $(stk [sqar+[loc.t ~] stk])
+      [%sym *]
+    $(kid.i.stk [[[%sym +.tok.t] loc.t] kid.i.stk])
+      [%num *]
+    $(kid.i.stk [[+.tok.t loc.t] kid.i.stk])
+      [%cor *]
+    $(kid.i.stk [[+.tok.t loc.t] kid.i.stk])
+      [%tap *]
+    $(kid.i.stk [[[%tape +.tok.t] loc.t] kid.i.stk])
+      %')'
+    ?-  tag.i.stk
+        %top   |+clop+loc.t
+        %sqar  |+cbwp+[beg.i.stk loc.t]
+        %rond
+      ?<  ?=(~ t.stk)  ::  would be %top
+      $(stk t.stk(kid.i [[rond+(flop kid.i.stk) beg.i.stk] kid.i.t.stk]))
+    ==
+      %']'
+    ?-  tag.i.stk
+        %top   |+clob+loc.t
+        %rond  |+cpwb+[beg.i.stk loc.t]
+        %sqar
+      ?<  ?=(~ t.stk)  ::  would be %top
+      $(stk t.stk(kid.i [[sqar+(flop kid.i.stk) beg.i.stk] kid.i.t.stk]))
+    ==
+  ==
 ++  read-tokens
   |=  in=(list token)
   =/  stk=(lest (pair ?(%top %rond %sqar) (list sexp)))  ~[top+~]
@@ -211,6 +375,37 @@
       ?<  ?=(~ t.stk)  ::  would be %top
       $(stk t.stk(q.i [sqar+(flop q.i.stk) q.i.t.stk]))
     ==
+  ==
+++  ntram-sqar
+  |=  [l=(list nexp) loc=sloc]
+  ^-  (each [tram tram] parse-err)
+  ?~  l    |+empty-tram+loc
+  ?~  t.l  |+single-tram+loc
+  %+  boof  (nparse-tram i.l)  |=  hed=tram
+  =/  l=(lest nexp)  t.l
+  =-  (boof - |=(tal=tram &+[hed tal]))
+  |-  ^-  (each tram parse-err)
+  %+  boof  (nparse-tram i.l)  |=  one=tram
+  ^-  (each tram parse-err)
+  ?~  t.l  &+one
+  %+  boof  ^$(l t.l)  |=  mor=tram
+  &+[%$ one mor]
+++  nparse-tram
+  |=  e=nexp
+  ^-  (each tram parse-err)
+  ?+  exp.e  |+bad-tram+loc.e
+      [%sym *]
+    [%& +.exp.e]
+      [%sqar *]
+    (boof (ntram-sqar +.exp.e loc.e) |=([tram tram] &+[%$ +<]))
+      [%rond [[%sym @] *] * *]
+    %+  boof
+      =*  mor  t.exp.e
+      ?~  t.mor  :: one more thing, must be sqar
+        ?.  ?=([%sqar *] exp.i.mor)  |+bad-tram+loc.i.mor
+        (ntram-sqar +.exp.i.mor loc.i.mor)
+      (ntram-sqar mor loc.i.mor)  ::  "insert" square
+    |=(cel=[tram tram] &+[+.exp.i.+.exp.e cel])
   ==
 ++  tram-sqar
   |=  l=(list sexp)
@@ -733,6 +928,10 @@
       .*  5
       .*  [lth mul dec]
       fact-module
-  %ok
+  =/  nok  (nokenize "[a b c]")
+  ?>  ?=(%& -.nok)
+  =/  red  (read-nokens p.nok)
+  ?>  ?=(%& -.red)
+  (nparse-tram p.red)
 ==
 ==
