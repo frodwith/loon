@@ -1,7 +1,14 @@
 /-  loon-token
 =,  loon-token
-=-  ^-  $=  tokenize  $-(tape (each (list toke) goof))
-    gen
+=-  ^-  $:  $=  tokenize
+            $-(tape (each (list toke) goof))
+            $=  pretty-err
+            $-(goof tape)
+        ==
+    :-  gen
+    |=  g=goof
+    ^-  tape
+    "unexpected {<chr.g>} at line {<lin.loc.g>} col {<col.loc.g>}."
 =/  lsdectape
   |=  in=tape
   =|  out=@
