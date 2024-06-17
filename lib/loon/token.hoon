@@ -20,11 +20,10 @@
     --
 =/  [pre=sloc at=sloc cur=sloc st=state out=(list toke)]
   [[0 0] [1 0] [1 1] ~ ~]
-|%  
+|%
 ++  lick
   |=  [beg=sloc t=toad]
-  ^-  toke
-  [[beg at] t]
+  +>(st ~, out [[[beg at] t] out])
 ++  close
   |=  end=sloc
   ^+  out
@@ -34,9 +33,6 @@
     %num  [[beg.st end] %atom (lsdectape pen.st)]
     %sym  [[beg.st end] %symb (crip (flop pen.st))]
   ==
-++  push
-  |=  t=toke
-  +>(st ~, out [t out])
 ++  gen
   |=  in=tape
   ^-  (each (list toke) goof)
@@ -67,13 +63,13 @@
     ?:  =('\\' c)   
       $(-.st %tae)  :: tape escape mode
     ?:  =('"' c)    :: end of tape
-      $(+> (push (lick beg.st tape+(flop pen.st))))
+      $(+> (lick beg.st tape+(flop pen.st)))
     $(pen.st [c pen.st])
   ?:  ?=([%cor *] st)
     ?:  =('\\' c)
       $(-.st %coe)  :: cord escape mode
     ?:  =('\'' c)   :: end of cord
-      $(+> (push (lick beg.st cord+(crip (flop pen.st)))))
+      $(+> (lick beg.st cord+(crip (flop pen.st))))
     $(pen.st [c pen.st])
   ::
   ::  normal char-at-a-time handling
@@ -87,7 +83,7 @@
   =*  die  |+[c at]
   ?:  =('_' c)         :: empty binder
     ?^  st  die
-    $(+> (push (lick at %symb %$)))
+    $(+> (lick at %symb %$))
   ::
   ::  whitespace
   ::
