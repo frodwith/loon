@@ -1,14 +1,19 @@
 /-  loon-token
 =,  loon-token
 =-  ^-  $:  $=  tokenize
-            $-(tape (each (list toke) goof))
-            $=  pretty-err
-            $-(goof tape)
+            $-(tape (each (list toke) toke-err))
+            $=  pretty-sloc
+            $-(sloc tape)
+            $=  pretty-toke-err
+            $-(toke-err tape)
         ==
-    :-  gen
-    |=  g=goof
+    =/  ploc
+      |=  loc=sloc
+      "line {<lin.loc>} col {<col.loc>}"
+    :+  gen  ploc
+    |=  e=toke-err
     ^-  tape
-    "unexpected {<chr.g>} at line {<lin.loc.g>} col {<col.loc.g>}."
+    "unexpected {<chr.e>} at {(ploc loc.e)}."
 =/  lsdectape
   |=  in=tape
   =|  out=@
@@ -20,11 +25,9 @@
     plc  (mul 10 plc)
     out  (add out (mul plc (sub i.in '0')))
   ==
-=>  |%
-    +$  state
-      $@  ~
-      [?(%sym %num %tap %tae %cor %coe) beg=sloc pen=tape]
-    --
+=/  state
+  $@  ~
+  [?(%sym %num %tap %tae %cor %coe) beg=sloc pen=tape]
 =/  [pre=sloc at=sloc cur=sloc st=state out=(list toke)]
   [[0 0] [1 0] [1 1] ~ ~]
 |%
@@ -42,7 +45,7 @@
   ==
 ++  gen
   |=  in=tape
-  ^-  (each (list toke) goof)
+  ^-  (each (list toke) toke-err)
   ?~  in  &+(flop (close at))
   ::
   ::  read a character c and remember its source location at
