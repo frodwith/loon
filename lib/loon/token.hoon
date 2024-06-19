@@ -1,19 +1,16 @@
 /-  loon-token
 =,  loon-token
-=-  ^-  $:  $=  tokenize
-            $-(tape (each (list toke) toke-err))
-            $=  pretty-sloc
-            $-(sloc tape)
-            $=  pretty-toke-err
-            $-(toke-err tape)
-        ==
-    =/  ploc
+=-  ^?
+    |%
+    ++  tokenize  gen
+    ++  pretty-sloc
       |=  loc=sloc
       "line {<lin.loc>} col {<col.loc>}"
-    :+  gen  ploc
-    |=  e=toke-err
-    ^-  tape
-    "unexpected {<chr.e>} at {(ploc loc.e)}."
+    ++  pretty-toke-err
+      |=  e=toke-err
+      ^-  tape
+      "unexpected {<chr.e>} at {(pretty-sloc loc.e)}."
+    --
 =/  lsdectape
   |=  in=tape
   =|  out=@

@@ -8,7 +8,7 @@
 ?^  in  
   =/  r  (tokenize in)
   ?:  ?=(%& -.r)  p.r
-  (pretty-err p.r)
+  (pretty-toke-err p.r)
 ?>  .=  (tokenize "63")
     &+~[[[[1 1] 1 2] atom+63]]
 ?>  .=  (tokenize "foo")
