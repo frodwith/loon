@@ -24,7 +24,8 @@
 ::  hints, but not the format a loon programmer interacts with
 ::  when for example quoting a loon expression (see sexp).
 ::  see "erase" and "nullify" for converting between sexp and lexp.
-::  note that these are adjunct, but do not round trip.
+::  sexp should round trip through lexp, but not vice versa.
+::  i think that means they're adjunct.
 +$  lexp
   $:  loc=spam
   $=  exp

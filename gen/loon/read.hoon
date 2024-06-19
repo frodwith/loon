@@ -66,12 +66,16 @@
     2+cpwb+[[1 1] 1 3]
 ?>  .=  (read-tape ~ "[1)")
     2+cbwp+[[1 1] 1 3]
-=/  red=tred  (read-tape /file/path "[a (b) c]")
+?>  .=  (nullify %pair symb+%foo %pair symb+%bar %null ~)
+    `[%rond `symb+%foo `symb+%bar ~]
+=/  red=tred  (read-tape ~ "[a (b) c]")
 ?>  ?=(%0 -.red)
-?>  .=  (erase +.red)
+=/  ras  (erase +.red)
+?>  .=  ras
   :-  [%symb %a]
   :-  [%pair [%symb %b] %null ~]
   [%symb %c]
-?>  .=  (nullify %pair symb+%foo %pair symb+%bar %null ~)
-    `[%rond `symb+%foo `symb+%bar ~]
+=/  nul  (nullify ras)
+?<  ?=(~ nul)
+?>  =(ras (erase nul))
 %ok
