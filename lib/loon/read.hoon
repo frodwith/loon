@@ -132,12 +132,12 @@
   ==
 ++  read-tape
   |=  [id=path t=tape]
-  ^-  tred
+  ^-  (each lexp read-tape-err)
   =/  tok  (tokenize t)
-  ?.  ?=(%& -.tok)  1+p.tok
+  ?.  ?=(%& -.tok)  |+&+p.tok
   =/  red  (read id p.tok)
-  ?.  ?=(%& -.red)  2+p.red
-  0+p.red
+  ?.  ?=(%& -.red)  |+|+p.red
+  &+p.red
 ++  pretty-read-err
   |=  e=read-err
   ^-  tape

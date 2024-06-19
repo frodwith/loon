@@ -9,11 +9,9 @@
 :-  %noun
 ?^  in
   =/  r  (read-tape ~ in)
-  ?-  -.r
-    %0  +.r
-    %1  (pretty-toke-err +.r)
-    %2  (pretty-read-err +.r)
-  ==
+  ?:  ?=(%& -.r)    p.r
+  ?:  ?=(%& -.p.r)  (pretty-toke-err p.p.r)
+  (pretty-read-err p.p.r)
 ?>  .=  (read-tape ~ "(foo bar baz)")
     :-  %0
     :-  `[[1 1] 1 13]
@@ -47,30 +45,30 @@
       [`[[1 7] [1 7]] 3]
     ==
 ?>  .=  (read-tape ~ "")
-    2+%none
+    |+|+%none
 ?>  .=  (read-tape ~ "1 2")
-    2+%many
+    |+|+%many
 ?>  .=  (read-tape ~ "(1")
-    2+pope+[1 1]
+    |+|+pope+[1 1]
 ?>  .=  (read-tape ~ "[1")
-    2+bope+[1 1]
+    |+|+bope+[1 1]
 ?>  .=  (read-tape ~ "[]")
-    2+bnum+0+[[1 1] 1 2]
+    |+|+bnum+0+[[1 1] 1 2]
 ?>  .=  (read-tape ~ "[1]")
-    2+bnum+1+[[1 1] 1 3]
+    |+|+bnum+1+[[1 1] 1 3]
 ?>  .=  (read-tape ~ "(1))")
-    2+clop+[1 4]
+    |+|+clop+[1 4]
 ?>  .=  (read-tape ~ "[1 2]]")
-    2+clob+[1 6]
+    |+|+clob+[1 6]
 ?>  .=  (read-tape ~ "(1]")
-    2+cpwb+[[1 1] 1 3]
+    |+|+cpwb+[[1 1] 1 3]
 ?>  .=  (read-tape ~ "[1)")
-    2+cbwp+[[1 1] 1 3]
+    |+|+cbwp+[[1 1] 1 3]
 ?>  .=  (nullify %pair symb+%foo %pair symb+%bar %null ~)
     `[%rond `symb+%foo `symb+%bar ~]
-=/  red=tred  (read-tape ~ "[a (b) c]")
-?>  ?=(%0 -.red)
-=/  ras  (erase +.red)
+=/  red  (read-tape ~ "[a (b) c]")
+?>  ?=(%& -.red)
+=/  ras  (erase p.red)
 ?>  .=  ras
   :-  [%symb %a]
   :-  [%pair [%symb %b] %null ~]

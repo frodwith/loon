@@ -46,10 +46,5 @@
       [%cpwb p=sloc b=sloc]  :: closed paren with brace
       [%cbwp b=sloc p=sloc]  :: vice versa
   ==
-::  read-tape's result type
-+$  tred
-  $%  [%0 lexp]
-      [%1 toke-err]
-      [%2 read-err]
-  ==
++$  read-tape-err  (each toke-err read-err)
 --
