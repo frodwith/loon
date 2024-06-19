@@ -10,8 +10,7 @@
 ?^  in
   =/  r  (read-tape ~ in)
   ?:  ?=(%& -.r)    p.r
-  ?:  ?=(%& -.p.r)  (pretty-toke-err p.p.r)
-  (pretty-read-err p.p.r)
+  (pretty-read-tape-err p.r)
 ?>  .=  (read-tape ~ "(foo bar baz)")
     :-  %0
     :-  `[[1 1] 1 13]

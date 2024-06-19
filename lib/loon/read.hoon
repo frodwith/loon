@@ -158,4 +158,8 @@
     [%cpwb *]  "'(' at {(ps p.e)} closed by ']' at {(ps b.e)}."
     [%cbwp *]  "'[' at {(ps b.e)} closed by ')' at {(ps p.e)}."
   ==
+++  pretty-read-tape-err
+  |=  e=read-tape-err
+  ?:  ?=(%& -.e)  (pretty-toke-err p.e)
+  (pretty-read-err p.e)
 --
