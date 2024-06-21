@@ -5,21 +5,18 @@
 =,  rlib
 ^?
 |%
-++  burr
-  |*  r=mold
-  |*  a=mold
-  |=  [a=(parm a) f=$-(a (parm r))]
-  ?~(-.a (f p.a) a)
 ::  apply a parse-errable function f to every lexp in a lest,
 ::  consing results with k (pattern when parsing lists to tuples)
 ++  tuplify
   |*  b=mold
   |=  [l=(lest lexp) k=$-([b b] b) f=$-(lexp (parm b))]
+  ^-  (parm b)
   =/  heh   (f i.l)
   ?~  t.l   heh
-  ;<  h=b  (burr b)  heh
-  ;<  r=b  (burr b)  ^$(l t.l)
-  &+(k h r)
+  ?.  ?=(%& -.heh)  heh
+  =/  r  $(l t.l)
+  ?.  ?=(%& -.r)  r
+  &+(k p.heh p.r)
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -42,9 +39,11 @@
     [%cons +<]
   ++  parse-sqar
     |=  [i=lexp t=(lest lexp)]
-    ;<  hed=uexp  (burr uexp)  (parse-uexp i)
-    ;<  tal=uexp  (burr uexp)  ((tuplify uexp) t june parse-uexp)
-    &+(june hed tal)
+    =/  hed  (parse-uexp i)
+    ?.  ?=(%& -.hed)  hed
+    =/  tal  ((tuplify uexp) t june parse-uexp)
+    ?.  ?=(%& -.tal)  tal
+    &+(june p.hed p.tal)
   ++  parse-args
     |=  arg=(list lexp)
     ^-  (parm uexp)
@@ -59,11 +58,10 @@
     (die %many)
   ++  parse-bug
     |=  [bug=? loc=spam args=(list lexp)]
-    ^-  (parm uexp)
     =.  tac  [bug+loc tac]
-    ;<  bod=lexp  (burr uexp)  (one-lexp args)
-    =.  ^bug  bug
-    (parse-uexp bod)
+    =/  bod  (one-lexp args)
+    ?.  ?=(%& -.bod)  bod
+    (parse-uexp(bug bug) p.bod)
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
@@ -79,12 +77,15 @@
         =*  args  t.l.exp.e
         ?.  ?=([%symb *] exp.op)
           =.  tac   [appl+loc.e tac]
-          ;<  lam=uexp  (burr uexp)  $(e op)
-          ;<  arg=uexp  (burr uexp)  (parse-args args)
-          &+(wrap loc.e %appl lam arg)
+          =/  lam  $(e op)
+          ?.  ?=(%& -.lam)  lam
+          =/  arg  (parse-args args)
+          ?.  ?=(%& -.arg)  arg
+          &+(wrap loc.e %appl p.lam p.arg)
         ?+  s.exp.op  =.  tac   [appl+loc.e tac]
-                      ;<  arg=uexp  (burr uexp)  (parse-args args)
-                      &+(wrap loc.e %appl s.exp.op arg)
+                      =/  arg  (parse-args args)
+                      ?.  ?=(%& -.arg)  arg
+                      &+(wrap loc.e %appl s.exp.op p.arg)
           %bug    (parse-bug & loc.e args)
           %debug  (parse-bug | loc.e args)
         ==
@@ -94,13 +95,16 @@
     ^-  (parm prog)
     =.  tac  [prog+loc.e tac]
     ?.  ?=  [* %rond [* %symb %main] *]  e
-      ;<  usr=uexp  (burr prog)  (parse-uexp e)
-      &+[%$ usr]
+      =/  usr  (parse-uexp e)
+      ?.  ?=(%& -.usr)  usr
+      &+[%$ p.usr]
     =*  bod  t.l.exp.e
     ?.  ?=  [* * ~]  bod  |+main-args+tac
-    ;<  bon=bond  (burr prog)  (parse-bond &1.bod)
-    ;<  usr=uexp  (burr prog)  (parse-uexp &2.bod)
-    &+[bon usr]
+    =/  bon  (parse-bond &1.bod)
+    ?.  ?=(%& -.bon)  bon
+    =/  usr  (parse-uexp &2.bod)
+    ?.  ?=(%& -.usr)  usr
+    &+[p.bon p.usr]
   --
 ++  parse-tape
   |=  [id=path in=tape]
