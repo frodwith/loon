@@ -43,4 +43,5 @@
 +$  desc  ?(~ %main-args %many)
 +$  parse-err  [des=desc tac=trak]
 +$  parse-tape-err  (each read-tape-err parse-err)
+++  parm  |*(a=mold (each a parse-err))
 --

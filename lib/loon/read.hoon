@@ -27,13 +27,9 @@
   ?@  exp.e  [%atom exp.e]
   ?-  -.exp.e
     %symb  exp.e
-    %cord  [%atom +.exp.e]
-    %tape  =/  l  +.exp.e
-           |-  ^-  sexp
-           ?~  l  [%atom ~]
-           :-  [%atom i.l]
-           $(l t.l)
-    %rond  =/  l  +.exp.e
+    %cord  exp.e
+    %tape  exp.e
+    %rond  =/  l  l.exp.e
            |-  ^-  sexp
            ?~  l  [%null ~]
            :+  %pair  ^$(e i.l)
@@ -49,11 +45,15 @@
   |=  e=sexp
   ^-  $@(~ lexp)  ::  improper lists fail
   ?-  -.e
-      %symb
     ::  the ` means null spam
-    `e
       %atom
     `a.e
+      %symb
+    `e
+      %cord
+    `e
+      %tape
+    `e
       %null
     `[%rond ~]
       %pair

@@ -10,10 +10,13 @@
 ::  a list is evaluated as an operator and argument(s).
 ::  cells are evaluated as make-a-cell-of-evaluating-my-components.
 ::  so cells and list structure are also distinguished.
+::  cords and tapes preserve intent.
 +$  sexp
-  $^  [p=sexp q=sexp]        :: brackets, non-empty tapes
-  $%  [%atom a=@]            :: cords, numbers, empty tapes
-      [%symb s=@tas]         :: distinguished names (it's the s)
+  $^  [p=sexp q=sexp]        :: brackets
+  $%  [%atom a=@]            :: numbers
+      [%symb s=@tas]         :: distinguished names
+      [%cord c=cord]         :: atomic strings
+      [%tape t=tape]         :: listy strings
       [%pair p=sexp q=sexp]  :: list structure (round parens)
       [%null ~]              :: the empty list
   ==
@@ -30,10 +33,10 @@
   $:  loc=spam
   $=  exp
   $@  @
-  $%  [%symb @tas]
-      [%tape tape]
-      [%cord cord]
-      [%rond (list lexp)]
+  $%  [%symb s=@tas]
+      [%tape t=tape]
+      [%cord c=cord]
+      [%rond l=(list lexp)]
       [%sqar i=lexp t=(lest lexp)]  :: at least two lexps
   ==  ==
 +$  read-err
