@@ -97,7 +97,7 @@
         %symb  [[id ran.t] dat.t]
         %tape  [[id ran.t] dat.t]
         %atom  [[id ran.t] +.dat.t]
-        %cord  [[id ran.t] +.dat.t]
+        %cord  [[id ran.t] dat.t]
       ==
     ==
   ?-  c.t

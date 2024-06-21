@@ -58,7 +58,7 @@
     (die %many)
   ++  parse-bug
     |=  [bug=? loc=spam args=(list lexp)]
-    =.  tac  [bug+loc tac]
+    =.  tac  [dbug+loc tac]
     =/  bod  (one-lexp args)
     ?.  ?=(%& -.bod)  bod
     (parse-uexp(bug bug) p.bod)
@@ -88,6 +88,11 @@
                       &+(wrap loc.e %appl s.exp.op p.arg)
           %bug    (parse-bug & loc.e args)
           %debug  (parse-bug | loc.e args)
+          %frag   =.  tac  [frag+loc.e tac]
+                  ?.  ?=([[* @] ^ ~] args)  (die ~)
+                  =/  of  (parse-uexp +<.args)
+                  ?.  ?=(%& -.of)  of
+                  &+(wrap loc.e %frag ->.args p.of)
         ==
     ==
   ++  parse-prog
@@ -99,7 +104,7 @@
       ?.  ?=(%& -.usr)  usr
       &+[%$ p.usr]
     =*  bod  t.l.exp.e
-    ?.  ?=  [* * ~]  bod  |+main-args+tac
+    ?.  ?=  [* * ~]  bod  (die ~)
     =/  bon  (parse-bond &1.bod)
     ?.  ?=(%& -.bon)  bon
     =/  usr  (parse-uexp &2.bod)
