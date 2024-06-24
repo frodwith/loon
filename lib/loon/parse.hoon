@@ -5,18 +5,21 @@
 =,  rlib
 ^?
 |%
+++  barm
+  |*  [a=(parm) f=$-(* (parm))]
+  ?.  ?=(%& -.a)  a
+  (f p.a)
 ::  apply a parse-errable function f to every lexp in a lest,
 ::  consing results with k (pattern when parsing lists to tuples)
 ++  tuplify
   |*  b=mold
   |=  [l=(lest lexp) k=$-([b b] b) f=$-(lexp (parm b))]
   ^-  (parm b)
-  =/  heh   (f i.l)
-  ?~  t.l   heh
-  ?.  ?=(%& -.heh)  heh
-  =/  r  $(l t.l)
-  ?.  ?=(%& -.r)  r
-  &+(k p.heh p.r)
+  =/  one   (f i.l)
+  ?~  t.l   one
+  %+  barm  one        |=  hed=b
+  %+  barm  ^$(l t.l)  |=  tal=b
+  &+p=(k hed tal)
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -39,29 +42,29 @@
     [%cons +<]
   ++  parse-sqar
     |=  [i=lexp t=(lest lexp)]
-    =/  hed  (parse-uexp i)
-    ?.  ?=(%& -.hed)  hed
-    =/  tal  ((tuplify uexp) t june parse-uexp)
-    ?.  ?=(%& -.tal)  tal
-    &+(june p.hed p.tal)
+    %+  barm  (parse-uexp i)                      |=  hed=uexp
+    %+  barm  ((tuplify uexp) t june parse-uexp)  |=  tal=uexp
+    &+(june hed tal)
   ++  parse-args
     |=  arg=(list lexp)
     ^-  (parm uexp)
-    ?~  arg    (die ~)
+    ::  arg can't be empty
+    ?~  arg    (die %none)
+    ::  but it can be a single uexp (including [... ...])
     ?~  t.arg  (parse-uexp i.arg)
+    ::  or, if there are more, we will parse them as if they had []
     (parse-sqar arg)
   ++  one-lexp
     |=  args=(list lexp)
     ^-  (parm lexp)
-    ?~  args    (die ~)
+    ?~  args    (die %none)
     ?~  t.args  &+i.args
     (die %many)
   ++  parse-bug
     |=  [bug=? loc=spam args=(list lexp)]
     =.  tac  [dbug+loc tac]
-    =/  bod  (one-lexp args)
-    ?.  ?=(%& -.bod)  bod
-    (parse-uexp(bug bug) p.bod)
+    %+  barm  (one-lexp args)  |=  bod=lexp
+    (parse-uexp(bug bug) bod)
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
@@ -72,27 +75,23 @@
       [%sqar *]  =.  tac   [sqar+loc.e tac]
                  (parse-sqar +.exp.e)
       [%rond *]
-        ?~  l.exp.e    (die ~)
+        ?~  l.exp.e    (die %none)
         =*  op    i.l.exp.e
         =*  args  t.l.exp.e
         ?.  ?=([%symb *] exp.op)
           =.  tac   [appl+loc.e tac]
-          =/  lam  $(e op)
-          ?.  ?=(%& -.lam)  lam
-          =/  arg  (parse-args args)
-          ?.  ?=(%& -.arg)  arg
-          &+(wrap loc.e %appl p.lam p.arg)
+          %+  barm  $(e op)            |=  lam=uexp
+          %+  barm  (parse-args args)  |=  arg=uexp
+          &+(wrap loc.e %appl lam arg)
         ?+  s.exp.op  =.  tac   [appl+loc.e tac]
-                      =/  arg  (parse-args args)
-                      ?.  ?=(%& -.arg)  arg
-                      &+(wrap loc.e %appl s.exp.op p.arg)
+                      %+  barm  (parse-args args)  |=  arg=uexp
+                      &+(wrap loc.e %appl s.exp.op arg)
           %bug    (parse-bug & loc.e args)
           %debug  (parse-bug | loc.e args)
           %frag   =.  tac  [frag+loc.e tac]
                   ?.  ?=([[* @] ^ ~] args)  (die ~)
-                  =/  of  (parse-uexp +<.args)
-                  ?.  ?=(%& -.of)  of
-                  &+(wrap loc.e %frag ->.args p.of)
+                  %+  barm  (parse-uexp +<.args)  |=  of=uexp
+                  &+(wrap loc.e %frag ->.args of)
         ==
     ==
   ++  parse-prog
@@ -100,16 +99,12 @@
     ^-  (parm prog)
     =.  tac  [prog+loc.e tac]
     ?.  ?=  [* %rond [* %symb %main] *]  e
-      =/  usr  (parse-uexp e)
-      ?.  ?=(%& -.usr)  usr
-      &+[%$ p.usr]
+      (barm (parse-uexp e) |=(u=uexp &+[%$ u]))
     =*  bod  t.l.exp.e
     ?.  ?=  [* * ~]  bod  (die ~)
-    =/  bon  (parse-bond &1.bod)
-    ?.  ?=(%& -.bon)  bon
-    =/  usr  (parse-uexp &2.bod)
-    ?.  ?=(%& -.usr)  usr
-    &+[p.bon p.usr]
+    %+  barm  (parse-bond &1.bod)  |=  bon=bond
+    %+  barm  (parse-uexp &2.bod)  |=  usr=uexp
+    &+[bon usr]
   --
 ++  parse-tape
   |=  [id=path in=tape]
