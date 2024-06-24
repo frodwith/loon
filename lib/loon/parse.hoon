@@ -12,14 +12,15 @@
 ::  apply a parse-errable function f to every lexp in a lest,
 ::  consing results with k (pattern when parsing lists to tuples)
 ++  tuplify
-  |*  b=mold
-  |=  [l=(lest lexp) k=$-([b b] b) f=$-(lexp (parm b))]
-  ^-  (parm b)
+  |*  [l=(lest lexp) k=$-(^ *) f=$-(lexp (parm))]
+  |-
   =/  one   (f i.l)
+  ^+  one
   ?~  t.l   one
+  =*  b  _?~(-.one p.one !!)
   %+  barm  one        |=  hed=b
   %+  barm  ^$(l t.l)  |=  tal=b
-  &+p=(k hed tal)
+  &+(k hed tal)
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -42,8 +43,8 @@
     [%cons +<]
   ++  parse-sqar
     |=  [i=lexp t=(lest lexp)]
-    %+  barm  (parse-uexp i)                      |=  hed=uexp
-    %+  barm  ((tuplify uexp) t june parse-uexp)  |=  tal=uexp
+    %+  barm  (parse-uexp i)               |=  hed=uexp
+    %+  barm  (tuplify t june parse-uexp)  |=  tal=uexp
     &+(june hed tal)
   ++  parse-args
     |=  arg=(list lexp)
