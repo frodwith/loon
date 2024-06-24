@@ -21,6 +21,16 @@
   %+  barm  one        |=  hed=b
   %+  barm  ^$(l t.l)  |=  tal=b
   &+(k hed tal)
+++  boon
+  |=  [a=bond b=bond]
+  ^-  bond
+  [%cell %$ a b]
+++  june
+  |=  [a=uexp b=uexp]
+  ^-  uexp
+  ?:  ?=([[%litn *] %litn *] +<)
+    [%litn val.a val.b]
+  [%cons +<]
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -34,27 +44,40 @@
   ++  parse-bond
     |=  e=lexp
     ^-  (parm bond)
-    !!
-  ++  june
-    |=  [a=uexp b=uexp]
-    ^-  uexp
-    ?:  ?=([[%litn *] %litn *] +<)
-      [%litn val.a val.b]
-    [%cons +<]
+    ?+  e  (die ~)
+      [* %symb *]  &+s.exp.e
+      [* %sqar *]  ((parse-sqar bond) boon ..$ +.exp.e)
+      [* %rond [* %symb *] *]
+        =*  r  l.exp.e
+        %+  barm  ((parse-tup bond) boon ..$ t.r)  |=  tal=bond
+        ?.  ?=([%cell *] tal)  (die ~)
+        &+tal(n s.exp.i.r)
+    ==
   ++  parse-sqar
-    |=  [i=lexp t=(lest lexp)]
-    %+  barm  (parse-uexp i)               |=  hed=uexp
-    %+  barm  (tuplify t june parse-uexp)  |=  tal=uexp
-    &+(june hed tal)
+    |*  b=mold
+    |=  $:  cons=$-([b b] b)
+            parse=$-(lexp (parm b))
+            i=lexp
+            t=(lest lexp)
+        ==
+    %+  barm  (parse i)               |=  hed=b
+    %+  barm  (tuplify t cons parse)  |=  tal=b
+    &+(cons hed tal)
+  ++  parse-tup
+    |*  b=mold
+    |=  $:  cons=$-([b b] b)
+            parse=$-(lexp (parm b))
+            tup=(list lexp)
+        ==
+    ::  tup can't be empty
+    ?~  tup  (die %none)
+    ::  but it can be a single b (including [])
+    ?~  t.tup  (parse i.tup)
+    ::  or, if there are more, we will parse them as if they had []
+    ((parse-sqar b) cons parse tup)
   ++  parse-args
     |=  arg=(list lexp)
-    ^-  (parm uexp)
-    ::  arg can't be empty
-    ?~  arg    (die %none)
-    ::  but it can be a single uexp (including [... ...])
-    ?~  t.arg  (parse-uexp i.arg)
-    ::  or, if there are more, we will parse them as if they had []
-    (parse-sqar arg)
+    ((parse-tup uexp) june parse-uexp arg)
   ++  one-lexp
     |=  args=(list lexp)
     ^-  (parm lexp)
@@ -74,7 +97,7 @@
       @          &+litn+exp.e
       [%symb *]  &+s.exp.e
       [%sqar *]  =.  tac   [sqar+loc.e tac]
-                 (parse-sqar +.exp.e)
+                 ((parse-sqar uexp) june parse-uexp +.exp.e)
       [%rond *]
         ?~  l.exp.e    (die %none)
         =*  op    i.l.exp.e
