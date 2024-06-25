@@ -38,9 +38,9 @@
       [%dint tag=@ clu=uexp exp=uexp]
   ==
 +$  prog  [arg=bond exp=uexp]
-+$  mote  ?(%prog %uexp %sqar %appl %dbug %frag)
++$  mote  ?(%prog %uexp %sqar %appl %dbug %frag %bond %barn)
 +$  trak  (list [mot=mote loc=spam])
-+$  desc  ?(~ %none %many)
++$  desc  ?(~ %none %many %alias)
 +$  parse-err  [des=desc tac=trak]
 +$  parse-tape-err  (each read-tape-err parse-err)
 ++  parm  |*(a=mold (each a parse-err))

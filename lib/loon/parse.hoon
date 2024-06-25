@@ -31,6 +31,17 @@
   ?:  ?=([[%litn *] %litn *] +<)
     [%litn val.a val.b]
   [%cons +<]
+++  bons  |=([a=barn b=barn] +<)
+++  parse-sqar
+  |*  b=mold
+  |=  $:  cons=$-([b b] b)
+          parse=$-(lexp (parm b))
+          i=lexp
+          t=(lest lexp)
+      ==
+  %+  barm  (parse i)               |=  hed=b
+  %+  barm  (tuplify t cons parse)  |=  tal=b
+  &+(cons hed tal)
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -41,28 +52,6 @@
     ^-  uexp
     ?:  |(bug ?=(~ loc))  u
     [%spot loc u]
-  ++  parse-bond
-    |=  e=lexp
-    ^-  (parm bond)
-    ?+  e  (die ~)
-      [* %symb *]  &+s.exp.e
-      [* %sqar *]  ((parse-sqar bond) boon ..$ +.exp.e)
-      [* %rond [* %symb *] *]
-        =*  r  l.exp.e
-        %+  barm  ((parse-tup bond) boon ..$ t.r)  |=  tal=bond
-        ?.  ?=([%cell *] tal)  (die ~)
-        &+tal(n s.exp.i.r)
-    ==
-  ++  parse-sqar
-    |*  b=mold
-    |=  $:  cons=$-([b b] b)
-            parse=$-(lexp (parm b))
-            i=lexp
-            t=(lest lexp)
-        ==
-    %+  barm  (parse i)               |=  hed=b
-    %+  barm  (tuplify t cons parse)  |=  tal=b
-    &+(cons hed tal)
   ++  parse-tup
     |*  b=mold
     |=  $:  cons=$-([b b] b)
@@ -75,6 +64,46 @@
     ?~  t.tup  (parse i.tup)
     ::  or, if there are more, we will parse them as if they had []
     ((parse-sqar b) cons parse tup)
+  ++  parse-barn
+    |=  e=lexp
+    ^-  (parm barn)
+    =.  tac  [barn+loc.e tac]
+    ?+  exp.e  (die ~)
+      [%symb *]  &+s.exp.e
+      [%sqar *]  ((parse-sqar barn) bons ..$ +.exp.e)
+    ==
+  ++  parse-bonds
+    |=  ls=(list lexp)
+    ^-  (parm bond)
+    ((parse-tup bond) boon parse-bond ls)
+  ++  parse-bond
+    |=  e=lexp
+    ^-  (parm bond)
+    =.  tac  [bond+loc.e tac]
+    ?+  exp.e  (die ~)
+        [%symb *]
+      &+s.exp.e
+        [%sqar *]
+      ((parse-sqar bond) boon ..$ +.exp.e)
+        [%rond *]
+      =*  r  l.exp.e
+      ?+  r  (die ~)
+          [[* %symb *] *]
+        %+  barm  (parse-bonds t.r)  |=  tal=bond
+        =*  s  s.exp.i.r
+        ?-  tal
+          @          (die %alias)
+          [%cell *]  &+tal(n s)
+          [%core *]  &+tal(n s)
+        ==
+          [[* %rond *] *]
+        %+  barm  =.  tac  [barn+loc.i.r tac]
+                  ((parse-tup barn) bons parse-barn l.exp.i.r)
+        |=  bat=barn
+        %+  barm  (parse-bonds t.r)  |=  pay=bond
+        &+[%core %$ bat pay]
+      ==
+    ==
   ++  parse-args
     |=  arg=(list lexp)
     ((parse-tup uexp) june parse-uexp arg)
