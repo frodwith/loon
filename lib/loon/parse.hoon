@@ -103,7 +103,6 @@
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
-    =.  tac  [uexp+loc.e tac]
     ?-  exp.e
       @          &+litn+exp.e
       [%symb *]  &+s.exp.e
@@ -157,7 +156,7 @@
           %+  barm  (parse-uexp &2.args)  |=  b=uexp
           &+same+a^b
             %if
-          =.  tac  [if+loc.e tac]
+          =.  tac  [cond+loc.e tac]
           ?.  ?=([* * * ~] args)  (die ~)
           %+  barm  (parse-uexp &1.args)  |=  t=uexp
           %+  barm  (parse-uexp &2.args)  |=  y=uexp
@@ -190,7 +189,7 @@
           %+  barm  (parse-uexp &3.args)  |=  bod=uexp
           &+bind+[s.exp.i.args to bod]
             %fn
-          =.  tac  [fn+loc.e tac]
+          =.  tac  [lamb+loc.e tac]
           ?+  args  (die ~)
             [* * ~]
               %+  barm  (parse-tram &1.args)  |=  arg=tram

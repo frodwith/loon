@@ -42,7 +42,7 @@
   ==
 ?^  in
   =/  par  (parse-tape ~ in)
-  ?:  ?=(%& -.par)  ~[leaf+"{<p.par>}"]
+  ?:  ?=(%& -.par)  ~[(sell !>(p.par))]
   ?:  ?=(%& -.p.par)  ~[leaf+(pretty-read-tape-err p.p.par)]
   (dump p.p.par)
 =/  case=(list [name=tape exp=uexp t=tape])
