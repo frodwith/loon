@@ -42,7 +42,10 @@
   =|  tac=trak
   |_  bug=?
   ++  die  |=(d=desc |+[d tac])
-  ++  tops  ::  generate a spot form if bug is off
+  ::  generate a spot form if bug is off
+  ::  in general, wrap this around things that can crash
+  ;:  (so if they do, you know where they did) and function calls
+  ++  tops
     |=  [loc=spam u=uexp]
     ^-  uexp
     ?:  |(bug ?=(~ loc))  u
@@ -105,7 +108,7 @@
     ^-  (parm uexp)
     ?-  exp.e
       @          &+litn+exp.e
-      [%symb *]  &+s.exp.e
+      [%symb *]  &+(tops loc.e s.exp.e)
       [%tape *]  &+exp.e
       [%cord *]  &+exp.e
       [%sqar *]  =.  tac   [sqar+loc.e tac]
@@ -220,7 +223,7 @@
           =.  tac  [pull+loc.e tac]
           ?.  ?=([[* @] * ~] args)  (die ~)
           %+  barm  (parse-uexp &2.args)  |=  cor=uexp
-          &+pull+[exp.i.args cor]
+          &+(tops loc.e pull+[exp.i.args cor])
             %sint
           =.  tac  [sint+loc.e tac]
           ?.  ?=([* * ~] args)  (die ~)
