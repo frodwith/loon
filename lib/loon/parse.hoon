@@ -21,17 +21,12 @@
   %+  barm  one        |=  hed=b
   %+  barm  ^$(l t.l)  |=  tal=b
   &+(k hed tal)
-++  boon
-  |=  [a=bond b=bond]
-  ^-  bond
-  [%cell %$ a b]
 ++  june
   |=  [a=uexp b=uexp]
   ^-  uexp
   ?:  ?=([[%litn *] %litn *] +<)
     [%litn val.a val.b]
   [%cons +<]
-++  bons  |=([a=barn b=barn] +<)
 ++  parse-sqar
   |*  b=mold
   |=  $:  cons=$-([b b] b)
@@ -47,7 +42,7 @@
   =|  tac=trak
   |_  bug=?
   ++  die  |=(d=desc |+[d tac])
-  ++  wrap
+  ++  tops  ::  generate a spot form if bug is off
     |=  [loc=spam u=uexp]
     ^-  uexp
     ?:  |(bug ?=(~ loc))  u
@@ -64,47 +59,15 @@
     ?~  t.tup  (parse i.tup)
     ::  or, if there are more, we will parse them as if they had []
     ((parse-sqar b) cons parse tup)
-  ++  parse-barn
+  ++  parse-tram
     |=  e=lexp
-    ^-  (parm barn)
-    =.  tac  [barn+loc.e tac]
+    ^-  (parm tram)
+    =.  tac  [tram+loc.e tac]
     ?+  exp.e  (die ~)
       [%symb *]  &+s.exp.e
-      [%sqar *]  ((parse-sqar barn) bons ..$ +.exp.e)
+      [%sqar *]  ((parse-sqar tram) |=([tram tram] +<) ..$ +.exp.e)
     ==
-  ++  parse-bonds
-    |=  ls=(list lexp)
-    ^-  (parm bond)
-    ((parse-tup bond) boon parse-bond ls)
-  ++  parse-bond
-    |=  e=lexp
-    ^-  (parm bond)
-    =.  tac  [bond+loc.e tac]
-    ?+  exp.e  (die ~)
-        [%symb *]
-      &+s.exp.e
-        [%sqar *]
-      ((parse-sqar bond) boon ..$ +.exp.e)
-        [%rond *]
-      =*  r  l.exp.e
-      ?+  r  (die ~)
-          [[* %symb *] *]
-        %+  barm  (parse-bonds t.r)  |=  tal=bond
-        =*  s  s.exp.i.r
-        ?-  tal
-          @          (die %alias)
-          [%cell *]  &+tal(n s)
-          [%core *]  &+tal(n s)
-        ==
-          [[* %rond *] *]
-        %+  barm  =.  tac  [barn+loc.i.r tac]
-                  ((parse-tup barn) bons parse-barn l.exp.i.r)
-        |=  bat=barn
-        %+  barm  (parse-bonds t.r)  |=  pay=bond
-        &+[%core %$ bat pay]
-      ==
-    ==
-  ++  parse-args
+  ++  parse-args  ::  parse the arguments to an operator
     |=  arg=(list lexp)
     ((parse-tup uexp) june parse-uexp arg)
   ++  one-lexp
@@ -118,13 +81,26 @@
     =.  tac  [dbug+loc tac]
     %+  barm  (one-lexp args)  |=  bod=lexp
     (parse-uexp(bug bug) bod)
+  ++  parse-band
+    |=  e=lexp
+    =.  tac  [band+loc.e tac]
+    ^-  (parm band)
+    ?+  exp.e  (die ~)
+      [%sqar *]
+        ((parse-sqar band) |=([band band] +<) ..$ +.exp.e)
+      [%rond [* %symb *] * ~]
+        %+  barm  (parse-uexp &3.exp.e)  |=  bod=uexp
+        &+[~ s.exp.i.l.exp.e bod]
+    ==
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
     =.  tac  [uexp+loc.e tac]
-    ?+  exp.e  (die ~)
+    ?-  exp.e
       @          &+litn+exp.e
       [%symb *]  &+s.exp.e
+      [%tape *]  &+exp.e
+      [%cord *]  &+exp.e
       [%sqar *]  =.  tac   [sqar+loc.e tac]
                  ((parse-sqar uexp) june parse-uexp +.exp.e)
       [%rond *]
@@ -132,19 +108,78 @@
         =*  op    i.l.exp.e
         =*  args  t.l.exp.e
         ?.  ?=([%symb *] exp.op)
+          ::  op not symbol, treat as application
           =.  tac   [appl+loc.e tac]
           %+  barm  $(e op)            |=  lam=uexp
           %+  barm  (parse-args args)  |=  arg=uexp
-          &+(wrap loc.e %appl lam arg)
-        ?+  s.exp.op  =.  tac   [appl+loc.e tac]
-                      %+  barm  (parse-args args)  |=  arg=uexp
-                      &+(wrap loc.e %appl s.exp.op arg)
-          %bug    (parse-bug & loc.e args)
-          %debug  (parse-bug | loc.e args)
-          %frag   =.  tac  [frag+loc.e tac]
-                  ?.  ?=([[* @] ^ ~] args)  (die ~)
-                  %+  barm  (parse-uexp +<.args)  |=  of=uexp
-                  &+(wrap loc.e %frag ->.args of)
+          &+(tops loc.e %appl lam arg)
+        ?+  s.exp.op
+          ::  default, lookup symbol and apply
+          =.  tac   [appl+loc.e tac]
+          %+  barm  (parse-args args)  |=  arg=uexp
+          &+(tops loc.e %appl s.exp.op arg)
+            %bug
+          (parse-bug & loc.e args)
+            %debug
+          (parse-bug | loc.e args)
+            %frag
+          =.  tac  [frag+loc.e tac]
+          ?.  ?=([[* @] * ~] args)  (die ~)
+          %+  barm  (parse-uexp &2.args)  |=  of=uexp
+          &+(tops loc.e %frag +.&1.args of)
+            %edit
+          =.  tac  [edit+loc.e tac]
+          ?.  ?=([[* @] * * ~] args)  (die ~)
+          %+  barm  (parse-uexp &2.args)  |=  tgt=uexp
+          %+  barm  (parse-uexp &3.args)  |=  val=uexp
+          &+(tops loc.e %edit +.&1.args tgt val)
+            %bump
+          =.  tac  [bump+loc.e tac]
+          ?.  ?=([* ~] args)  (die ~)
+          %+  barm  (parse-uexp &1.args)  |=  atm=uexp
+          &+(tops loc.e %bump atm)
+            %deep
+          =.  tac  [deep+loc.e tac]
+          ?.  ?=([* ~] args)  (die ~)
+          (barm (parse-uexp &1.args) |=(e=uexp &+deep+e))
+            %same
+          =.  tac  [deep+loc.e tac]
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  barm  (parse-uexp &1.args)  |=  a=uexp
+          %+  barm  (parse-uexp &2.args)  |=  b=uexp
+          &+same+a^b
+            %if
+          =.  tac  [if+loc.e tac]
+          ?.  ?=([* * * ~] args)  (die ~)
+          %+  barm  (parse-uexp &1.args)  |=  t=uexp
+          %+  barm  (parse-uexp &2.args)  |=  y=uexp
+          %+  barm  (parse-uexp &3.args)  |=  n=uexp
+          &+cond+t^y^n
+            %with
+          =.  tac  [with+loc.e tac]
+          ?.  ?=([* * * ~] args)  (die ~)
+          %+  barm  (parse-tram &1.args)  |=  nam=tram
+          %+  barm  (parse-uexp &2.args)  |=  val=uexp
+          %+  barm  (parse-uexp &3.args)  |=  in=uexp
+          &+with+nam^val^in
+            %let
+          =.  tac  [let+loc.e tac]
+          ?.  ?=([* * * ~] args)  (die ~)
+          %+  barm  (parse-tram &1.args)  |=  nam=tram
+          %+  barm  (parse-uexp &2.args)  |=  val=uexp
+          %+  barm  (parse-uexp &3.args)  |=  in=uexp
+          &+letn+nam^val^in
+            %rec
+          =.  tac  [letr+loc.e tac]
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  barm  (parse-band &1.args)  |=  arm=band
+          %+  barm  (parse-uexp &2.args)  |=  in=uexp
+          &+letr+arm^in
+            %bind
+          ?.  ?=([[* %symb *] * * ~] args)  (die ~)
+          %+  barm  (parse-tram &2.args)  |=  to=tram
+          %+  barm  (parse-uexp &3.args)  |=  bod=uexp
+          &+bind+[s.exp.i.args to bod]
         ==
     ==
   ++  parse-prog
@@ -155,9 +190,9 @@
       (barm (parse-uexp e) |=(u=uexp &+[%$ u]))
     =*  bod  t.l.exp.e
     ?.  ?=  [* * ~]  bod  (die ~)
-    %+  barm  (parse-bond &1.bod)  |=  bon=bond
-    %+  barm  (parse-uexp &2.bod)  |=  usr=uexp
-    &+[bon usr]
+    %+  barm  (parse-tram &1.bod)  |=  bus=tram
+    %+  barm  (parse-uexp &2.bod)  |=  exp=uexp
+    &+[bus exp]
   --
 ++  parse-tape
   |=  [id=path in=tape]
