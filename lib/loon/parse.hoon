@@ -81,16 +81,24 @@
     =.  tac  [dbug+loc tac]
     %+  barm  (one-lexp args)  |=  bod=lexp
     (parse-uexp(bug bug) bod)
+  ++  band-cons  |=([band band] +<)
   ++  parse-band
     |=  e=lexp
     =.  tac  [band+loc.e tac]
     ^-  (parm band)
     ?+  exp.e  (die ~)
       [%sqar *]
-        ((parse-sqar band) |=([band band] +<) ..$ +.exp.e)
+        ((parse-sqar band) band-cons ..$ +.exp.e)
       [%rond [* %symb *] * ~]
         %+  barm  (parse-uexp &3.exp.e)  |=  bod=uexp
         &+[~ s.exp.i.l.exp.e bod]
+    ==
+  ++  parse-tag
+    |=  e=lexp
+    ^-  (parm @)
+    ?+  exp.e  (die ~)
+      @          &+exp.e
+      [%cord *]  &+c.exp.e
     ==
   ++  parse-uexp  
     |=  e=lexp
@@ -170,16 +178,63 @@
           %+  barm  (parse-uexp &3.args)  |=  in=uexp
           &+letn+nam^val^in
             %rec
-          =.  tac  [letr+loc.e tac]
+          =.  tac  [rec+loc.e tac]
           ?.  ?=([* * ~] args)  (die ~)
           %+  barm  (parse-band &1.args)  |=  arm=band
           %+  barm  (parse-uexp &2.args)  |=  in=uexp
           &+letr+arm^in
             %bind
+          =.  tac  [bind+loc.e tac]
           ?.  ?=([[* %symb *] * * ~] args)  (die ~)
           %+  barm  (parse-tram &2.args)  |=  to=tram
           %+  barm  (parse-uexp &3.args)  |=  bod=uexp
           &+bind+[s.exp.i.args to bod]
+            %fn
+          =.  tac  [fn+loc.e tac]
+          ?+  args  (die ~)
+            [* * ~]
+              %+  barm  (parse-tram &1.args)  |=  arg=tram
+              %+  barm  (parse-uexp &2.args)  |=  bod=uexp
+              &+lamb+[%$ arg bod]
+            [[* %symb *] * * ~]
+              %+  barm  (parse-tram &2.args)  |=  arg=tram
+              %+  barm  (parse-uexp &3.args)  |=  bod=uexp
+              &+lamb+[s.exp.i.args arg bod]
+          ==
+            %dfn
+          =.  tac  [dfn+loc.e tac]
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  barm  (parse-tram &1.args)  |=  arg=tram
+          %+  barm  (parse-uexp &2.args)  |=  bod=uexp
+          &+delt+arg^bod
+            %nock
+          =.  tac  [nock+loc.e tac]
+          ?.  ?=([* *] args)  (die ~)
+          %+  barm  (parse-uexp &1.args)  |=  fol=uexp
+          %+  barm  (parse-args +.args)   |=  arg=uexp
+          &+nock+fol^arg
+            %core
+          =.  tac  [core+loc.e tac]
+          %+  barm  ((parse-tup band) band-cons parse-band args)
+          |=  arm=band  &+core+arm
+            %pull
+          =.  tac  [pull+loc.e tac]
+          ?.  ?=([[* @] * ~] args)  (die ~)
+          %+  barm  (parse-uexp &2.args)  |=  cor=uexp
+          &+pull+[exp.i.args cor]
+            %sint
+          =.  tac  [sint+loc.e tac]
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  barm  (parse-tag &1.args)   |=  tag=@
+          %+  barm  (parse-uexp &2.args)  |=  exp=uexp
+          &+sint+tag^exp
+            %dint
+          =.  tac  [dint+loc.e tac]
+          ?.  ?=([* * * ~] args)  (die ~)
+          %+  barm  (parse-tag &1.args)   |=  tag=@
+          %+  barm  (parse-uexp &2.args)  |=  clu=uexp
+          %+  barm  (parse-uexp &3.args)  |=  exp=uexp
+          &+dint+tag^clu^exp
         ==
     ==
   ++  parse-prog

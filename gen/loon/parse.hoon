@@ -68,6 +68,31 @@
       "(rec [(foo a) (bar b)] [foo bar])"
       :+  "bind"  [%bind %d [[%a %b] %c] %cons %b %cons %c %a]
       "(bind d [[a b] c] [b c a])"
+      :+  "fn"  [%lamb %$ %a %a]  "(fn a a)"
+      :+  "rfn"
+        :*  %lamb  %loop  %i
+            %cond  [%same %i litn+4]
+            cord+'done'
+            [%appl %loop %bump %i]
+        ==
+      "(fn loop i (if (same i 4) 'done' (loop (bump i))))"
+      :+  "appl"  [%appl %foo %a]           "(foo a)"
+      :+  "app2"  [%appl %foo %cons %a %b]  "(foo a b)"
+      :+  "aind"  [%appl [%frag 3 %c] %a]   "((frag 3 c) a)"
+      :+  "dfn"   [%delt %a %a]             "(dfn a a)"
+      :+  "nock"  [%nock %fol %bus]         "(nock fol bus)"
+      :+  "autonock"  [%nock %fol %cons %hed %tal]
+      "(nock fol hed tal)"
+      :+  "core"  [%core ~ %foo %a]  "(core (foo a))"
+      :+  "cor2"  [%core [~ %foo %a] ~ %bar %b]
+      "(core [(foo a) (bar b)])"
+      :+  "autocore"  [%core [~ %foo %a] ~ %bar %b]
+      "(core (foo a) (bar b))"
+      :+  "pull"  [%pull 2 %core ~ %foo litn+42]
+      "(pull 2 (core (foo 42)))"
+      :+  "sint"  [%sint %tag litn+42]  "(sint 'tag' 42)"
+      :+  "dint"  [%dint %tag tape+"clu" litn+42]
+      "(dint 'tag' \"clu\" 42)"
   ==
 =|  out=(list tank)
 |-  ^+  out
