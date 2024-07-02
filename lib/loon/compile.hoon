@@ -136,4 +136,15 @@
              &+dint+tag.e^clu^exp 
     ==
   --
+  ++  pretty-compile-err
+    |=  e=compile-err
+    ^-  tang
+    :_  (turn tac.e rend-spot)
+    :-  %leaf
+    =*  c  cud.e
+    ?-  c
+      %cab       "cannot use _ as a variable"
+      [%find *]  "unbound variable {<nam.c>}"
+      [%barm *]  "cannot bind arm {<nam.c>}"
+    ==
 --

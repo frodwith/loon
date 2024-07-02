@@ -11,6 +11,7 @@
   =/  par  (parse-tape ~ in)
   ?:  ?=(%| -.par)
     (pretty-parse-tape-err p.par)
-  :_  ~
-  %-  sell  !>  (~(mint uk %arg ~) p.par)
+  =/  ken  (~(mint uk %arg ~) p.par)
+  ?:  ?=(%| -.ken)  (pretty-compile-err p.ken)
+  :_  ~  %-  sell  !>  p.ken
 ~[leaf+"ok"]
