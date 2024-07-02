@@ -21,7 +21,7 @@
       [%deep val=uexp]
       [%same a=uexp b=uexp]
       [%cond t=uexp y=uexp n=uexp]
-      [%with nam=tram val=uexp in=uexp]
+      [%with nam=tram val=uexp do=uexp]
       [%letn nam=tram val=uexp in=uexp]
       [%letr arm=band in=uexp]
       [%bind leg=@t to=tram bod=uexp]
@@ -40,5 +40,5 @@
 +$  desc  ?(~ %none %many %alias)
 +$  parse-err  [des=desc tac=trak]
 +$  parse-tape-err  (each read-tape-err parse-err)
-++  parm  |*(a=mold (each a parse-err))
+++  parm  |*(a=mold (each a parse-err))  :: parsing monad
 --
