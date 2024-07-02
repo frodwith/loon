@@ -1,5 +1,5 @@
 /-  psur=loon-parse
-/+  plib=loon-parse, clib=loon-compile
+/+  plib=loon-parse, clib=loon-compile, punk
 =,  psur
 =,  plib
 =,  clib
@@ -13,5 +13,5 @@
     (pretty-parse-tape-err p.par)
   =/  ken  (~(mint uk %arg ~) p.par)
   ?:  ?=(%| -.ken)  (pretty-compile-err p.ken)
-  :_  ~  %-  sell  !>  p.ken
+  :_  ~  %-  sell  !>  (compile:punk (kp p.ken))
 ~[leaf+"ok"]

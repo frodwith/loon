@@ -18,7 +18,7 @@
 +$  kern
   $~  [%name 0 0]
   $^  [p=kern q=kern]
-  $%  [%name dex=@ how=$@(@ [rec=@ arm=@])]
+  $%  [%name del=@ how=$@(@ [rec=@ arm=@])]
       [%frag axe=@ of=kern]
       [%edit axe=@ tgt=kern val=kern]
       [%litn val=*]

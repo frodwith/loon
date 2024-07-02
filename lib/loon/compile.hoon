@@ -136,15 +136,53 @@
              &+dint+tag.e^clu^exp 
     ==
   --
-  ++  pretty-compile-err
-    |=  e=compile-err
-    ^-  tang
-    :_  (turn tac.e rend-spot)
-    :-  %leaf
-    =*  c  cud.e
-    ?-  c
-      %cab       "cannot use _ as a variable"
-      [%find *]  "unbound variable {<nam.c>}"
-      [%barm *]  "cannot bind arm {<nam.c>}"
-    ==
+++  unq
+  |=  [del=@ axe=@]
+  =/  f=*  [0 axe]
+  ?~  del  f
+  :-  1
+  =|  i=@
+  |-  ^-  *
+  ?:  =(i del)  f
+  $(i +(i), f [',' f])
+++  kp  ::  kern -> punk
+  |=  e=kern
+  ^-  *  ::  punk
+  ?-  -.e
+    ^      [$(e p.e) $(e q.e)]
+    %name  ?@  how.e  (unq del.e how.e)
+           [9 ['\'' arm.how.e] (unq del.e rec.how.e)]
+    %frag  [7 $(e of.e) 0 axe.e]
+    ::  whenever input can determine the head of a cell,
+    ::  like the axis of our edit here, we must hard quote it
+    ::  to prevent punk from seeing it as an operator
+    %edit  [10 [['\'' axe.e] $(e val.e)] $(e tgt.e)]
+    %litn  [1 '\'' val.e]
+    %deep  [3 $(e val.e)]
+    %bump  [4 $(e atm.e)]
+    %same  [5 $(e a.e) $(e b.e)]
+    %cond  [6 $(e t.e) $(e y.e) $(e n.e)]
+    %with  [7 $(e val.e) $(e do.e)]
+    %letn  [8 $(e val.e) $(e in.e)]
+    %letr  [8 [1 $(e bat.e)] $(e in.e)]
+    %lamb  [[1 $(e bod.e)] 0 1]
+    %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
+    %delt  ['`' $(e bod.e)]
+    %nock  [2 $(e arg.e) $(e fol.e)]
+    %core  [[1 $(e bat.e)] 0 1]
+    %pull  [9 ['\'' axe.e] $(e cor.e)]
+    %sint  [11 ['\'' tag.e] $(e exp.e)]
+    %dint  [11 [['\'' tag.e] $(e clu.e)] $(e exp.e)]
+  ==
+++  pretty-compile-err
+  |=  e=compile-err
+  ^-  tang
+  :_  (turn tac.e rend-spot)
+  :-  %leaf
+  =*  c  cud.e
+  ?-  c
+    %cab       "cannot use _ as a variable"
+    [%find *]  "unbound variable {<nam.c>}"
+    [%barm *]  "cannot bind arm {<nam.c>}"
+  ==
 --
