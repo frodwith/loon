@@ -12,7 +12,7 @@
   $@  @t
   $%  [%cell p=bond q=bond]
       [%core bat=tram pay=bond]
-      [%also new=tram [dex=@ axe=@] old=bond]
+      [%also new=tram [del=@ axe=@] old=bond]
   ==
 +$  text  (lest bond)
 +$  kern

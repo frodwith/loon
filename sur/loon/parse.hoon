@@ -35,7 +35,6 @@
       [%sint tag=@ exp=uexp]
       [%dint tag=@ clu=uexp exp=uexp]
   ==
-+$  prog  [arg=tram exp=uexp]
 +$  trak  (list [mot=@tas loc=spam])
 +$  desc  ?(~ %none %many %alias)
 +$  parse-err  [des=desc tac=trak]

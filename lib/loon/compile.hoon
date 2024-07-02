@@ -1,4 +1,5 @@
-/-  psur=loon-parse, csur=loon-compile, plib=loon-parse
+/-  psur=loon-parse, csur=loon-compile
+/+  plib=loon-parse
 =,  psur
 =,  csur
 =,  plib
@@ -35,9 +36,9 @@
     =|  del=@
     |=  n=@t
     ^-  path
-    ?~  ctx  ~
     =;  her
       ?.  ?=(~ her)  her
+      ?~  t.ctx  ~
       $(del +(del), ctx t.ctx)
     =*  bon  i.ctx
     =/  axe=@  1
@@ -58,8 +59,8 @@
       =/  fax  (rind new.bon n)
       ?~  fax  $(bon old.bon)
       =/  inx=@  (peg axe.bon fax)
-      ?~  del.bon  [del (peg axe inx)]
-      [(add del del.bon) inx]
+      ?~  del.bon  [del leg+(peg axe inx)]
+      [(add del del.bon) leg+inx]
     ==
   ++  die
     |=  cud=crud
@@ -82,7 +83,7 @@
              &+frag+axe.e^of
       %edit  %+  b  r(e tgt.e)  |=  tgt=kern
              %+  b  r(e val.e)  |=  val=kern
-             &+edit+tgt^val
+             &+edit+axe.e^tgt^val
       %litn  &+e
       %tape  &+litn+t.e
       %cord  &+litn+c.e
@@ -98,22 +99,22 @@
              %+  b  r(e n.e)  |=  n=kern
              &+cond+t^y^n
       %with  %+  b  r(e val.e)  |=  val=kern
-             %+  b  r(e in.e, i.ctx (lift nam.e))
+             %+  b  r(e do.e, i.ctx (lift nam.e))
              |=  do=kern  &+with+val^do
       %letn  %+  b  r(e val.e)  |=  val=kern
              %+  b  r(e in.e, i.ctx [%cell (lift nam.e) i.ctx])
              |=  in=kern  &+letn+val^in
-      %letr  %+  b  (wear arm.e)        |=  [bat=kern b=bond]
-             %+  b  r(e in.e, i.ctx b)  |=  in=kern
-             &+letr+cor^in
-      %bind  =/  p=path  (find nam.e)
-             ?~  p  (die %find nam.e)
-             ?:  ?=(%arm +<.p)  (die %barm nam.e)
+      %letr  %+  b  (wear arm.e)          |=  [bat=kern bon=bond]
+             %+  b  r(e in.e, i.ctx bon)  |=  in=kern
+             &+letr+bat^in
+      %bind  =/  p=path  (find leg.e)
+             ?~  p  (die %find leg.e)
+             ?:  ?=(%arm +<.p)  (die %barm leg.e)
              r(e bod.e, i.ctx [%also to.e [del.p leg.f.p] i.ctx])
       %lamb  ?~  nam.e
                %+  b  r(e bod.e, i.ctx [%cell (lift arg.e) i.ctx])
                |=  bod=kern  &+lamb+bod
-             r(e [%letr [~ nam.e %lamb ~ arg.e bod.e] nam.e])
+             r(e [%letr [~ nam.e %lamb %$ arg.e bod.e] nam.e])
       %appl  %+  b  r(e lam.e)  |=  lam=kern
              %+  b  r(e arg.e)  |=  arg=kern
              &+appl+lam^arg

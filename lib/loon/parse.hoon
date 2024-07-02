@@ -242,24 +242,53 @@
           &+dint+tag^clu^exp
         ==
     ==
-  ++  parse-prog
-    |=  e=lexp
-    ^-  (parm prog)
-    =.  tac  [prog+loc.e tac]
-    ?.  ?=  [* %rond [* %symb %main] *]  e
-      (bach (parse-uexp e) |=(u=uexp &+[%$ u]))
-    =*  bod  t.l.exp.e
-    ?.  ?=  [* * ~]  bod  (die ~)
-    %+  bach  (parse-tram &1.bod)  |=  bus=tram
-    %+  bach  (parse-uexp &2.bod)  |=  exp=uexp
-    &+[bus exp]
   --
 ++  parse-tape
   |=  [id=path in=tape]
-  ^-  (each prog parse-tape-err)
+  ^-  (each uexp parse-tape-err)
   =/  red  (read-tape id in)
   ?.  ?=(%& -.red)  |+&+p.red
-  =/  par  (parse-prog:pe p.red)
+  =/  par  (parse-uexp:pe p.red)
   ?.  ?=(%& -.par)  |+|+p.par
   &+p.par
+++  rend-spot
+  |=  s=spot
+  ^-  tank
+  =*  l   p.q.s
+  =*  r   q.q.s
+  :~  %rose  [":" ~ ~]
+      (smyt p.s)
+      :~  %rose  ["." "<" ">"] 
+          :~  %rose  [" " "[" "]"]
+              leaf+(scow %ud p.l)
+              leaf+(scow %ud q.l)
+          ==
+          :~  %rose  [" " "[" "]"]
+              leaf+(scow %ud p.r)
+              leaf+(scow %ud q.r)
+          ==
+      ==
+  ==
+++  pretty-parse-err
+  |=  err=parse-err
+  =|  out=tang
+  =/  in  tac.err
+  :-  ?~  des.err  leaf+"parse error"
+      leaf+"{<des.err>}"
+  |-  ^-  tang
+  ?~  in  (flop out)
+  %=  $  in  t.in  out  :_  out
+    :~  %rose  ["|" "" ""]
+        leaf+"{<mot.i.in>}"
+        ?~  loc.i.in
+          leaf+"<no location>"
+        (rend-spot loc.i.in)
+    ==
+  ==
+++  pretty-parse-tape-err
+  |=  e=parse-tape-err
+  ^-  tang
+  ?:  ?=(%& -.e)
+    ~[leaf+(pretty-read-tape-err p.e)]
+  (pretty-parse-err p.e)
 --

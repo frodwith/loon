@@ -6,45 +6,11 @@
 :-  %say
 |=  [^ ~ [in=tape ~]]
 :-  %tang
-=/  rend-spot
-  |=  s=spot
-  ^-  tank
-  =*  l   p.q.s
-  =*  r   q.q.s
-  :~  %rose  [":" ~ ~]
-      (smyt p.s)
-      :~  %rose  ["." "<" ">"] 
-          :~  %rose  [" " "[" "]"]
-              leaf+(scow %ud p.l)
-              leaf+(scow %ud q.l)
-          ==
-          :~  %rose  [" " "[" "]"]
-              leaf+(scow %ud p.r)
-              leaf+(scow %ud q.r)
-          ==
-      ==
-  ==
-=/  dump
-  |=  err=parse-err
-  =|  out=(list tank)
-  =/  in  tac.err
-  :-  ?~  des.err  leaf+"parse error"
-      leaf+"{<des.err>}"
-  |-  ^-  (list tank)
-  ?~  in  (flop out)
-  %=  $  in  t.in  out  :_  out
-    :~  %rose  ["|" "" ""]
-        leaf+"{<mot.i.in>}"
-        ?~  loc.i.in
-          leaf+"<no location>"
-        (rend-spot loc.i.in)
-    ==
-  ==
 ?^  in
   =/  par  (parse-tape ~ in)
-  ?:  ?=(%& -.par)  ~[(sell !>(p.par))]
-  ?:  ?=(%& -.p.par)  ~[leaf+(pretty-read-tape-err p.p.par)]
-  (dump p.p.par)
+  ?:  ?=(%| -.par)
+    (pretty-parse-tape-err p.par)
+  ~[(sell !>(p.par))]
 =/  case=(list [name=tape exp=uexp t=tape])
   :~  :+  "number"  litn+12           "12"
       :+  "symbol"  %a                "a"
@@ -94,7 +60,7 @@
       :+  "dint"  [%dint %tag tape+"clu" litn+42]
       "(dint 'tag' \"clu\" 42)"
   ==
-=|  out=(list tank)
+=|  out=tang
 |-  ^+  out
 ?~  case  [leaf+"ok" out]
 =*  c  i.case
@@ -102,7 +68,7 @@
     =/  red  (read-tape /test t.c)
     ?>  ?=(%& -.red)
     (parse-uexp:pe p.red)
-?.  ?=(%& -.got)  (dump p.got)
+?:  ?=(%| -.got)  (pretty-parse-err p.got)
 ?.  =(p.got exp.c)
   :_  out
   :~  %rose  [" " "!{name.c} " ""]
