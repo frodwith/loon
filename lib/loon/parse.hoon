@@ -218,6 +218,11 @@
           %+  b  r(e &1.args)          |=  fol=uexp
           %+  b  (parse-args +.args)   |=  arg=uexp
           &+(tops loc.e nock+fol^arg)
+            %line
+          =.  tac  [line+loc.e tac]
+          ?.  ?=([[* %symb *] *] args)  (die ~)
+          %+  b  r(e &2.args)  |=  arg=uexp
+          &+(tops loc.e line+[s.exp.i.args arg])
             %core
           =.  tac  [core+loc.e tac]
           %+  b  ((parse-tup band) band-cons parse-band args)

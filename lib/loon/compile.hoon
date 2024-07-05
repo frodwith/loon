@@ -48,9 +48,9 @@
       ?.  =(n bon)  ~
       [del %leg axe]  
         [%cell *]
-      =/  l  $(bon p.bon, axe (peg 2 axe))
+      =/  l  $(bon p.bon, axe (peg axe 2))
       ?.  ?=(~ l)  l
-      $(bon q.bon, axe (peg 3 axe))
+      $(bon q.bon, axe (peg axe 3))
         [%core *]
       =/  arm  (rind bat.bon n)
       ?~  arm  $(bon pay.bon, axe (peg axe 3))
@@ -123,6 +123,11 @@
       %nock  %+  b  r(e fol.e)  |=  fol=kern
              %+  b  r(e arg.e)  |=  arg=kern
              &+nock+fol^arg
+      %line  ?~  t.ctx  (die %top-line)
+             =/  p=path  (find(ctx t.ctx) mac.e)
+             ?.  ?=([@ %leg *] p)  (die %line mac.e p)
+             %+  b  r(e arg.e)  |=  arg=kern
+             &+line+[del.p^leg.f.p arg]
       %core  %+  b  (wear arm.e)  |=  [bat=kern *]
              &+core+bat
       %pull  %+  b  r(e cor.e)  |=  cor=kern
@@ -169,6 +174,14 @@
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
     %nock  [2 $(e arg.e) $(e fol.e)]
+    %line  =-  ?:  =([%name 0 1] arg.e)  -
+               ::  optimize [7 [0 1] a] to just a
+               [7 $(e arg.e) -]
+           :-  ','
+           =/  [i=@ a=*]  [0 0 axe.e]
+           |-  ^-  *
+           ?:  =(i del.e)  a
+           $(i +(i), a [',' a])
     %core  [[1 $(e bat.e)] 0 1]
     %pull  [9 ['\'' axe.e] $(e cor.e)]
     %sint  [11 ['\'' tag.e] $(e exp.e)]
@@ -181,8 +194,11 @@
   :-  %leaf
   =*  c  cud.e
   ?-  c
+    %top-line  "cannot inline at top level"
     %cab       "cannot use _ as a variable"
     [%find *]  "unbound variable {<nam.c>}"
     [%barm *]  "cannot bind arm {<nam.c>}"
+    [%line *]  ?~  p.c  "inline unbound variable {<nam.c>}"
+               "cannot inline arm {<nam.c>}"
   ==
 --

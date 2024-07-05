@@ -29,6 +29,7 @@
       [%appl lam=uexp arg=uexp]
       [%delt arg=tram bod=uexp]
       [%nock fol=uexp arg=uexp]
+      [%line mac=@t arg=uexp]
       [%core arm=band]
       [%pull axe=@ cor=uexp]
       [%spot s=spot exp=uexp]

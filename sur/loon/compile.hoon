@@ -33,6 +33,7 @@
       [%appl lam=kern arg=kern]
       [%delt bod=kern]
       [%nock fol=kern arg=kern]
+      [%line [del=@ axe=@] arg=kern]
       [%core bat=kern]
       [%pull axe=@ cor=kern]
       [%sint tag=@ exp=kern]
@@ -40,9 +41,10 @@
   ==
 +$  trac  (list spot)
 ++  crud  ::  compile-err description
-  $@  %cab
+  $@  ?(%cab %top-line)
   $%  [%find nam=@t]
       [%barm nam=@t]
+      [%line nam=@t p=path]
   ==
 +$  compile-err  [tac=trac cud=crud]
 ++  coma  |*(a=mold (each a compile-err))  ::  compiler monad
