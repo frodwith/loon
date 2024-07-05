@@ -10,9 +10,9 @@
   |=  [ram=tram n=@t]
   ^-  @
   ?@  ram  ?:(=(n ram) axe 0)
-  =/  p  $(ram p.ram, axe (peg 2 axe))
+  =/  p  $(ram p.ram, axe (peg axe 2))
   ?.  ?=(~ p)  p
-  $(ram q.ram, axe (peg 3 axe))
+  $(ram q.ram, axe (peg axe 3))
 ++  lift  ::  bond is a strict superset of tram
   |=  t=tram
   ^-  bond
@@ -174,8 +174,8 @@
     %appl  [7 [$(e lam.e) $(e arg.e)] 2 [[0 3] 0 5] 0 4]
     %delt  ['`' $(e bod.e)]
     %nock  [2 $(e arg.e) $(e fol.e)]
-    %line  =-  ?:  =([%name 0 1] arg.e)  -
-               ::  optimize [7 [0 1] a] to just a
+    %line  =-  ::  optimize [7 [0 1] a] to just a
+               ?:  =([%name 0 1] arg.e)  -
                [7 $(e arg.e) -]
            :-  ','
            =/  [i=@ a=*]  [0 0 axe.e]
