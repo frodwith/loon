@@ -157,7 +157,9 @@
     ^      [$(e p.e) $(e q.e)]
     %name  ?@  how.e  (unq del.e how.e)
            [9 ['\'' arm.how.e] (unq del.e rec.how.e)]
-    %frag  [7 $(e of.e) 0 axe.e]
+    %frag  ?:  ?=([%name %0 @] of.e)  ::  small opt for frag of leg
+             [0 (peg how.of.e axe.e)]
+           [7 $(e of.e) 0 axe.e]
     ::  whenever input can determine the head of a cell,
     ::  like the axis of our edit here, we must hard quote it
     ::  to prevent punk from seeing it as an operator
