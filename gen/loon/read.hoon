@@ -1,16 +1,19 @@
 /-  tsur=loon-token, rsur=loon-read
-/+  tlib=loon-token, rlib=loon-read
+/+  tlib=loon-token, rlib=loon-read, gut=loon-gen-utils
 =,  rsur
 =,  rlib
 =,  tsur
 =,  tlib
+=,  gut
 :-  %say
-|=  [^ ~ [in=tape ~]]
+|=  [^ ~ [=path =tape ~]]
 :-  %noun
+^-  (unit lexp)
+=/  in  (gen-input path tape)
 ?^  in
-  =/  r  (read-tape ~ in)
-  ?:  ?=(%& -.r)    p.r
-  (pretty-read-tape-err p.r)
+  =/  red  (read-tape in)
+  ?.  ?=(%& -.red)  (rant (pretty-read-tape-err p.red))
+  `p.red
 ?>  .=  (read-tape ~ "(foo bar baz)")
     :-  %0
     :-  `[[1 1] 1 13]
@@ -75,4 +78,4 @@
 =/  nul  (nullify ras)
 ?<  ?=(~ nul)
 ?>  =(ras (erase nul))
-%ok
+~&  %ok  ~

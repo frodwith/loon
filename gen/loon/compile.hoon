@@ -1,22 +1,15 @@
 /-  psur=loon-parse
-/+  plib=loon-parse, clib=loon-compile, punk
+/+  plib=loon-parse, clib=loon-compile, punk, gut=loon-gen-utils
 =,  psur
 =,  plib
 =,  clib
+=,  gut
 :-  %say
-|=  [^ ~ [in=$@(~ (each tape path)) stop=?(%kern %punk %nock) ~]]
+|=  [^ ~ [=path =tape stop=?(%kern %punk %nock) ~]]
 :-  %noun
-=/  sing
-  |=  t=tang
-  ~>  %slog.[0 %rose [[10 ~] "" ""] (flop t)]
-  ~
+=/  in  (gen-input path tape)
 ?^  in
-  =/  par
-    %-  parse-tape
-    ?~  -.in  `p.in
-    =/  file  .^(mime %cx p.in)
-    :-  p.in
-    (trip (end [3 p.q.file] q.q.file))
+  =/  par  (parse-tape in)
   ?:  ?=(%| -.par)  (sing (pretty-parse-tape-err p.par))
   =/  ken  (~(mint uk %arg ~) p.par)
   ?:  ?=(%| -.ken)  (sing (pretty-compile-err p.ken))

@@ -1,14 +1,17 @@
 /-  lsur=loon-token
-/+  llib=loon-token
+/+  llib=loon-token, gut=loon-gen-utils
 =,  lsur
+=,  gut
 =,  llib
 :-  %say
-|=  [^ ~ [in=tape ~]]
+|=  [^ ~ [=path =tape ~]]
 :-  %noun
+^-  (unit (list toke))
+=/  in  (gen-input path tape)
 ?^  in  
-  =/  r  (tokenize in)
-  ?:  ?=(%& -.r)  p.r
-  (pretty-toke-err p.r)
+  =/  r  (tokenize t.in)
+  ?.  ?=(%& -.r)  (rant (pretty-toke-err p.r))
+  `p.r
 ?>  .=  (tokenize "63")
     &+~[[[[1 1] 1 2] atom+63]]
 ?>  .=  (tokenize "foo")
@@ -57,4 +60,4 @@
     (tokenize "12f3")
 ?>  .=  [%.n '$' 1 1]
     (tokenize "$")
-%ok
+~&  %ok  ~

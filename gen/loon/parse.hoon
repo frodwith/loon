@@ -1,17 +1,19 @@
 /-  psur=loon-parse
-/+  plib=loon-parse, loon-read
+/+  plib=loon-parse, loon-read, gut=loon-gen-utils
 =,  psur
 =,  plib
 =,  loon-read
+=,  gut
 :-  %say
-|=  [^ ~ [in=tape ~]]
-:-  %tang
+|=  [^ ~ [=path =tape ~]]
+:-  %noun
+^-  (unit uexp)
+=/  in  (gen-input path tape)
 ?^  in
-  =/  par  (parse-tape ~ in)
-  ?:  ?=(%| -.par)
-    (pretty-parse-tape-err p.par)
-  ~[(sell !>(p.par))]
-=/  case=(list [name=tape exp=uexp t=tape])
+  =/  par  (parse-tape in)
+  ?:  ?=(%| -.par)  (sing (pretty-parse-tape-err p.par))
+  `p.par
+=/  case=(list [name=^tape exp=uexp t=^tape])
   :~  :+  "number"  litn+12           "12"
       :+  "symbol"  %a                "a"
       :+  "tape"    tape+"hi"         "\"hi\""
@@ -60,6 +62,7 @@
       :+  "dint"  [%dint %tag tape+"clu" litn+42]
       "(dint 'tag' \"clu\" 42)"
   ==
+=-  (sing -)
 =|  out=tang
 |-  ^+  out
 ?~  case  [leaf+"ok" out]
