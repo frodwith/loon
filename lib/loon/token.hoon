@@ -23,7 +23,7 @@
     out  (add out (mul plc (sub i.in '0')))
   ==
 =/  state
-  $@  ~
+  $@  ?(~ %com)
   [?(%sym %num %tap %tae %cor %coe) beg=sloc pen=tape]
 =/  [pre=sloc at=sloc cur=sloc st=state out=(list toke)]
   [[0 0] [1 0] [1 1] ~ ~]
@@ -57,6 +57,12 @@
              [lin.cur +(col.cur)]
       ==
   ::
+  ::  inside comments
+  ::
+  ?:  ?=(%com st)
+    ?.  =(10 c)  $
+    $(st ~)
+  ::
   ::  string escapes
   ::
   ?:  ?=([%tae *] st)
@@ -81,6 +87,8 @@
   ::
   ::  normal char-at-a-time handling
   ::
+  ?:  =(';' c)  :: begin comment
+    $(st %com)
   ?:  =('\'' c)
     $(st [%cor at ~])  :: begin cord
   ?:  =('"' c)
