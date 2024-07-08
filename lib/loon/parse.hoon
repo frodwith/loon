@@ -182,6 +182,25 @@
           %+  b  r(e &2.args)          |=  val=uexp
           %+  b  r(e &3.args)          |=  in=uexp
           &+letn+nam^val^in
+            %'let*'
+          =.  tac  [['let*' loc.e] tac]
+          ?.  ?=([[* %rond *] * ~] args)  (die ~)
+          =/  pas  l.exp.i.args
+          ?~  pas  (die ~)
+          =|  out=(list [tram uexp])
+          |-  ^-  (parm uexp)
+          =*  loop  $
+          ?.  ?=([* %rond * * ~] i.pas)  (die ~)
+          =*  p  l.exp.i.pas
+          %+  b  (parse-tram &1.p)  |=  nam=tram
+          %+  b  r(e &2.p)          |=  val=uexp
+          =/  hed  [nam val]
+          ?~  t.pas
+            %+  b  r(e &2.args)  |=  in=uexp
+            =/  fin  (flop hed out)
+            ?<  ?=(~ fin)
+            &+lets+fin^in
+          loop(pas t.pas, out [hed out])
             %rec
           =.  tac  [rec+loc.e tac]
           ?.  ?=([* * ~] args)  (die ~)

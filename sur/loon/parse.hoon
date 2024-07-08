@@ -8,6 +8,7 @@
 +$  tram  ::  tree of names
   $@  @t
   [p=tram q=tram]
++$  pelt  (lest [nam=tram val=uexp])
 +$  uexp
   $~  %a
   $@  @t  :: variable
@@ -23,6 +24,7 @@
       [%cond t=uexp y=uexp n=uexp]
       [%with nam=tram val=uexp do=uexp]
       [%letn nam=tram val=uexp in=uexp]
+      [%lets par=pelt in=uexp]
       [%letr arm=band in=uexp]
       [%bind leg=@t to=tram bod=uexp]
       [%lamb nam=@t arg=tram bod=uexp]

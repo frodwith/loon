@@ -104,6 +104,11 @@
       %letn  %+  b  r(e val.e)  |=  val=kern
              %+  b  r(e in.e, i.ctx [%cell (lift nam.e) i.ctx])
              |=  in=kern  &+letn+val^in
+      %lets  %=  r  e
+               :^  %letn  nam.i.par.e  val.i.par.e
+               ?~  t.par.e  in.e
+               [%lets t.par.e in.e]
+             ==
       %letr  %+  b  (wear arm.e)          |=  [bat=kern bon=bond]
              %+  b  r(e in.e, i.ctx bon)  |=  in=kern
              &+letr+bat^in
