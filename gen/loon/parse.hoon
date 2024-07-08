@@ -19,12 +19,12 @@
       :+  "tape"    tape+"hi"         "\"hi\""
       :+  "cord"    cord+'hi'         "'hi'"
       :+  "cell"    [%cons %a %b]     "[a b]"
-      :+  "bump"    bump+litn+42      "(bump 42)"
-      :+  "deep"    deep+%a           "(deep a)"
-      :+  "same"    [%same %a %b]     "(same a b)"
+      :+  "bump"    bump+litn+42      "(+ 42)"
+      :+  "deep"    deep+%a           "(? a)"
+      :+  "same"    [%same %a %b]     "(= a b)"
       :+  "if"      [%cond %a %b %c]  "(if a b c)"
       :+  "with"    [%with [%$ %b] [%frag 3 %c] %b]
-      "(with [_ b] (frag 3 c) b)"
+      "(with [_ b] (/ 3 c) b)"
       :+  "letn"
         :^  %letn  [[%a %$] %c]
           [%appl %foo %bar]
@@ -43,14 +43,14 @@
             cord+'done'
             [%appl %loop %bump %i]
         ==
-      "(fn loop i (if (same i 4) 'done' (loop (bump i))))"
+      "(fn loop i (if (= i 4) 'done' (loop (+ i))))"
       :+  "appl"  [%appl %foo %a]           "(foo a)"
       :+  "app2"  [%appl %foo %cons %a %b]  "(foo a b)"
-      :+  "aind"  [%appl [%frag 3 %c] %a]   "((frag 3 c) a)"
+      :+  "aind"  [%appl [%frag 3 %c] %a]   "((/ 3 c) a)"
       :+  "dfn"   [%delt %a %a]             "(dfn a a)"
-      :+  "nock"  [%nock %fol %bus]         "(nock fol bus)"
+      :+  "nock"  [%nock %fol %bus]         "(* fol bus)"
       :+  "autonock"  [%nock %fol %cons %hed %tal]
-      "(nock fol hed tal)"
+      "(* fol hed tal)"
       :+  "core"  [%core ~ %foo %a]  "(core (foo a))"
       :+  "cor2"  [%core [~ %foo %a] ~ %bar %b]
       "(core [(foo a) (bar b)])"

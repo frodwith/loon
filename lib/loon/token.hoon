@@ -11,20 +11,9 @@
       ^-  tape
       "unexpected {<chr.e>} at {(pretty-sloc loc.e)}."
     --
-=/  lsdectape
-  |=  in=tape
-  =|  out=@
-  =/  plc=@  1
-  |-  ^-  @
-  ?~  in  out
-  %=  $
-    in   t.in
-    plc  (mul 10 plc)
-    out  (add out (mul plc (sub i.in '0')))
-  ==
 =/  state
   $@  ?(~ %com)
-  [?(%sym %num %tap %tae %cor %coe) beg=sloc pen=tape]
+  [?(%sym %tap %tae %cor %coe) beg=sloc pen=tape]
 =/  [pre=sloc at=sloc cur=sloc st=state out=(list toke)]
   [[0 0] [1 0] [1 1] ~ ~]
 |%
@@ -36,9 +25,18 @@
   ^+  out
   ?@  st  out
   :_  out
-  ?+  -.st  ~|(%close !!)  ::  program bug
-    %num  [[beg.st end] %atom (lsdectape pen.st)]
-    %sym  [[beg.st end] %symb (crip (flop pen.st))]
+  ?>  ?=(%sym -.st)
+  :-  [beg.st end]
+  ?:  =("_" pen.st)  symb+%$  :: empty binder
+  =/  [cs=tape plc=@ sum=@]  [pen.st 1 0]
+  |-  ^-  toad
+  ?~  cs  atom+sum
+  =*  c  i.cs
+  ?.  &((gte c '0') (lte c '9'))  symb+(crip (flop pen.st))
+  %=  $
+    cs   t.cs
+    plc  (mul 10 plc)
+    sum  (add sum (mul plc (sub c '0')))
   ==
 ++  gen
   |=  in=tape
@@ -96,27 +94,15 @@
   ?:  ?=(?(%'(' %')' %'[' %']') c)
     $(st ~, out [[c at] (close pre)])
   =*  die  |+[c at]
-  ?:  =('_' c)         :: empty binder
-    ?^  st  die
-    $(+> (lick at %symb %$))
   ::
   ::  whitespace
   ::
   ?:  |(=(' ' c) =(10 c))
     $(st ~, out (close pre))
+  ?.  &((gte c '!') (lte c '~'))  die
   ::
-  ::  letters
+  ::  symbols/numbers (a number is a symbol with just numbers)
   ::
-  ?:  &((gte c 'a') (lte c 'z'))
-    ?@  st  $(st [%sym at c ~])
-    ?.  ?=(%sym -.st)  die
-    $(pen.st [c pen.st])
-  ::
-  ::  digits
-  ::
-  ?:  &((gte c '0') (lte c '9'))
-    ?@  st  $(st [%num at c ~])
-    ?.  ?=(%num -.st)  die
-    $(pen.st [c pen.st])
-  die
+  ?@  st  $(st [%sym at c ~])
+  $(pen.st [c pen.st])
 --

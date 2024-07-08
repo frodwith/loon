@@ -135,7 +135,7 @@
           (parse-bug & loc.e args)
             %debug
           (parse-bug | loc.e args)
-            %frag
+            %'/'
           =.  tac  [frag+loc.e tac]
           ?.  ?=([[* @] * ~] args)  (die ~)
           %+  b  r(e &2.args)  |=  of=uexp
@@ -146,16 +146,16 @@
           %+  b  r(e &2.args)  |=  tgt=uexp
           %+  b  r(e &3.args)  |=  val=uexp
           &+(tops loc.e %edit +.&1.args tgt val)
-            %bump
+            %'+'
           =.  tac  [bump+loc.e tac]
           ?.  ?=([* ~] args)  (die ~)
           %+  b  r(e &1.args)  |=  atm=uexp
           &+(tops loc.e %bump atm)
-            %deep
+            %'?'
           =.  tac  [deep+loc.e tac]
           ?.  ?=([* ~] args)  (die ~)
           (b r(e &1.args) |=(e=uexp &+deep+e))
-            %same
+            %'='
           =.  tac  [deep+loc.e tac]
           ?.  ?=([* * ~] args)  (die ~)
           %+  b  r(e &1.args)  |=  a=uexp
@@ -212,7 +212,7 @@
           %+  b  (parse-tram &1.args)  |=  arg=tram
           %+  b  r(e &2.args)          |=  bod=uexp
           &+delt+arg^(tops loc.i.&2.args bod)
-            %nock
+            %'*'
           =.  tac  [nock+loc.e tac]
           ?.  ?=([* *] args)  (die ~)
           %+  b  r(e &1.args)          |=  fol=uexp
