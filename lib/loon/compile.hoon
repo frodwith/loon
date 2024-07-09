@@ -159,7 +159,13 @@
   |=  e=kern
   ^-  *  ::  punk
   ?-  -.e
-    ^      [$(e p.e) $(e q.e)]
+    ^      ?:  ?&  ?=([%name * @] p.e)
+                   ?=([%name * @] q.e)
+                   =(del.p.e del.q.e)
+                   =((rsh [0 1] how.p.e) (rsh [0 1] how.q.e))
+               ==  ::  consing neighbors doesn't cons
+             $(e [%name del.p.e (rsh [0 1] how.p.e)])
+           [$(e p.e) $(e q.e)]
     %name  ?@  how.e  (unq del.e how.e)
            [9 ['\'' arm.how.e] (unq del.e rec.how.e)]
     %frag  ?:  ?=([%name %0 @] of.e)  ::  small opt for frag of leg
