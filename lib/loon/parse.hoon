@@ -24,8 +24,6 @@
 ++  june
   |=  [a=uexp b=uexp]
   ^-  uexp
-  ?:  ?=([[%litn *] %litn *] +<)
-    [%litn val.a val.b]
   [%cons +<]
 ++  parse-sqar
   |*  b=mold
