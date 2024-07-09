@@ -105,6 +105,36 @@
   ++  band-tup
     |=  ls=(list lexp)
     ((parse-tup band) band-cons parse-band ls)
+  ++  parse-sent
+    |=  e=lexp
+    ^-  (parm sent)
+    =.  tac   [sent+loc.e tac]
+    ?.  ?=([* %rond * * ~] e)  (die ~)
+    =*  l  l.exp.e
+    %+  bach  (parse-tram &1.l)  |=  sub=tram
+    %+  bach  (parse-uexp &2.l)  |=  ped=uexp
+    &+[sub ped]
+  ++  parse-page
+    |=  e=lexp
+    ^-  (parm page)
+    =.  tac   [page+loc.e tac]
+    ?.  ?=([* %sqar *] e)
+      (bach (parse-sent e) |=(s=sent &+`s))
+    ((parse-sqar page) |=([page page] +<) parse-page +.exp.e)
+  ++  parse-book
+    |=  e=lexp
+    =.  tac   [book+loc.e tac]
+    ?.  ?=([* %rond *] e)  (die ~)
+    =/  l=(list lexp)  l.exp.e
+    %+  bach
+      |-  ^-  (parm (list page))
+      ?~  l  &+~
+      %+  bach  (parse-page i.l)  |=  i=page
+      %+  bach  ^$(l t.l)         |=  t=(list page)
+      &+[i t]
+    |=  t=(list page)
+    ?~  t  (die %none)
+    &+t
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
@@ -178,42 +208,15 @@
           &+with+nam^val^in
             %let
           =.  tac  [let+loc.e tac]
-          ?:  ?=([[* %rond *] * ~] args)
-            ::  (let ((a foo) (b bar)) body) ~>
-            ::  (let [a b] [foo bar] body)
-            %+  b  (band-tup l.exp.i.args)  |=  arm=band
-            %+  b  r(e &2.args)             |=  in=uexp
-            =+  =/  a  arm
-                |-  ^-  [nam=tram val=uexp]
-                ?@  -.a  +.a
-                =/  p  $(a p.a)
-                =/  q  $(a q.a)
-                [[nam.p nam.q] %cons val.p val.q]
-            &+letn+nam^val^in
-          ?.  ?=([* * * ~] args)  (die ~)
-          %+  b  (parse-tram &1.args)  |=  nam=tram
-          %+  b  r(e &2.args)          |=  val=uexp
-          %+  b  r(e &3.args)          |=  in=uexp
-          &+letn+nam^val^in
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  b  (parse-page &1.args)  |=  p=page
+          %+  b  r(e &2.args)          |=  in=uexp
+          &+letn+p^in
             %'let*'
-          =.  tac  [['let*' loc.e] tac]
-          ?.  ?=([[* %rond *] * ~] args)  (die ~)
-          =/  pas  l.exp.i.args
-          ?~  pas  (die ~)
-          =|  out=(list [tram uexp])
-          |-  ^-  (parm uexp)
-          =*  loop  $
-          ?.  ?=([* %rond * * ~] i.pas)  (die ~)
-          =*  p  l.exp.i.pas
-          %+  b  (parse-tram &1.p)  |=  nam=tram
-          %+  b  r(e &2.p)          |=  val=uexp
-          =/  hed  [nam val]
-          ?~  t.pas
-            %+  b  r(e &2.args)  |=  in=uexp
-            =/  fin  (flop hed out)
-            ?<  ?=(~ fin)
-            &+lets+fin^in
-          loop(pas t.pas, out [hed out])
+          ?.  ?=([* * ~] args)  (die ~)
+          %+  b  (parse-book &1.args)  |=  bok=book
+          %+  b  r(e &2.args)          |=  in=uexp
+          &+lets+bok^in
             %rec
           =.  tac  [rec+loc.e tac]
           ?.  ?=([* * ~] args)  (die ~)

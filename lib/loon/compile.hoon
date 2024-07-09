@@ -101,13 +101,20 @@
       %with  %+  b  r(e val.e)  |=  val=kern
              %+  b  r(e do.e, i.ctx (lift nam.e))
              |=  do=kern  &+with+val^do
-      %letn  %+  b  r(e val.e)  |=  val=kern
-             %+  b  r(e in.e, i.ctx [%cell (lift nam.e) i.ctx])
+      %letn  =/  s
+               =/  pag=page  p.e
+               |-  ^-  sent
+               ?@  -.pag  s.pag
+               =/  p  $(pag p.pag)
+               =/  q  $(pag q.pag)
+               [[sub.p sub.q] %cons ped.p ped.q]
+             %+  b  r(e ped.s)  |=  val=kern
+             %+  b  r(e in.e, i.ctx [%cell (lift sub.s) i.ctx])
              |=  in=kern  &+letn+val^in
       %lets  %=  r  e
-               :^  %letn  nam.i.par.e  val.i.par.e
-               ?~  t.par.e  in.e
-               [%lets t.par.e in.e]
+               :+  %letn  i.b.e
+               ?~  t.b.e  in.e
+               [%lets t.b.e in.e]
              ==
       %letr  %+  b  (wear arm.e)          |=  [bat=kern bon=bond]
              %+  b  r(e in.e, i.ctx bon)  |=  in=kern

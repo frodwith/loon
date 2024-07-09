@@ -26,10 +26,9 @@
       :+  "with"    [%with [%$ %b] [%frag 3 %c] %b]
       "(with [_ b] (/ 3 c) b)"
       :+  "letn"
-        :^  %letn  [[%a %$] %c]
-          [%appl %foo %bar]
+        :+  %letn  `[[[%a %$] %c] %appl %foo %bar]
         [%cons %a %c]
-      "(let [[a _] c] (foo bar) [a c])"
+      "(let ([[a _] c] (foo bar)) [a c])"
       :+  "letr single"  [%letr [~ %foo %a] %a]  "(rec (foo a) a)"
       :+  "letr multi"
         [%letr [[~ %foo %a] ~ %bar %b] %cons %foo %bar]
@@ -68,7 +67,7 @@
 ?~  case  [leaf+"ok" out]
 =*  c  i.case
 =/  got=(parm uexp)
-    =/  red  (read-tape /test t.c)
+    =/  red  (read-tape [%test (crip name.c) ~] t.c)
     ?>  ?=(%& -.red)
     (parse-uexp:pe p.red)
 ?:  ?=(%| -.got)  (pretty-parse-err p.got)

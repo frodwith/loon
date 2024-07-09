@@ -8,7 +8,11 @@
 +$  tram  ::  tree of names
   $@  @t
   [p=tram q=tram]
-+$  pelt  (lest [nam=tram val=uexp])
++$  sent  [sub=tram ped=uexp]  ::  sentence - a binding element
++$  page                       ::  one or more parallel bindings
+  $^  [p=page q=page]
+  [~ s=sent]
++$  book  (lest page)          ::  sequential bindings
 +$  uexp
   $~  %a
   $@  @t  :: variable
@@ -23,8 +27,8 @@
       [%same a=uexp b=uexp]
       [%cond t=uexp y=uexp n=uexp]
       [%with nam=tram val=uexp do=uexp]
-      [%letn nam=tram val=uexp in=uexp]
-      [%lets par=pelt in=uexp]
+      [%letn p=page in=uexp]
+      [%lets b=book in=uexp]
       [%letr arm=band in=uexp]
       [%bind leg=@t to=tram bod=uexp]
       [%lamb nam=@t arg=tram bod=uexp]
