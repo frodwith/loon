@@ -102,6 +102,9 @@
       @          &+exp.e
       [%cord *]  &+c.exp.e
     ==
+  ++  band-tup
+    |=  ls=(list lexp)
+    ((parse-tup band) band-cons parse-band ls)
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
@@ -175,6 +178,18 @@
           &+with+nam^val^in
             %let
           =.  tac  [let+loc.e tac]
+          ?:  ?=([[* %rond *] * ~] args)
+            ::  (let ((a foo) (b bar)) body) ~>
+            ::  (let [a b] [foo bar] body)
+            %+  b  (band-tup l.exp.i.args)  |=  arm=band
+            %+  b  r(e &2.args)             |=  in=uexp
+            =+  =/  a  arm
+                |-  ^-  [nam=tram val=uexp]
+                ?@  -.a  +.a
+                =/  p  $(a p.a)
+                =/  q  $(a q.a)
+                [[nam.p nam.q] %cons val.p val.q]
+            &+letn+nam^val^in
           ?.  ?=([* * * ~] args)  (die ~)
           %+  b  (parse-tram &1.args)  |=  nam=tram
           %+  b  r(e &2.args)          |=  val=uexp
@@ -242,8 +257,8 @@
           &+(tops loc.e line+[s.exp.i.args arg])
             %core
           =.  tac  [core+loc.e tac]
-          %+  b  ((parse-tup band) band-cons parse-band args)
-          |=  arm=band  &+core+arm
+          %+  b  (band-tup args)  |=  arm=band
+          &+core+arm
             %pull
           =.  tac  [pull+loc.e tac]
           ?.  ?=([[* @] * ~] args)  (die ~)

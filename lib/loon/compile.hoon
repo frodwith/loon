@@ -159,19 +159,20 @@
   |=  e=kern
   ^-  *  ::  punk
   ?-  -.e
-    ^      =*  p  p.e
-           =*  q  q.e
-           ?:  ?&  ?=([%name * @] p)
-                   ?=([%name * @] q)
-                   =(del.p del.q)
-                   =((rsh [0 1] how.p) (rsh [0 1] how.q))
-               ==  ::  consing neighbors doesn't cons
-             $(e [%name del.p (rsh [0 1] how.p)])
-           ?:  ?&  ?=([%litn *] p)
-                   ?=([%litn *] q)
-               ==  ::  nor does consing literals
-             $(e [%litn val.p val.q])
-           [$(e p.e) $(e q.e)]
+    ^      =-  ?@  -<  $(e -)
+               [$(e p) $(e q)]
+           |-  ^-  kern
+           =?  q.e  ?=(^ -.q.e)  $(e q.e)  :: right-assoc
+           ?+  e  e
+             [[%litn *] %litn *]  [%litn val.p.e val.q.e]
+             [[%name * @] %name * @]
+               ?:  ?&  =(del.p.e del.q.e)
+                       =(+(how.p.e) how.q.e)
+                       =((rsh [0 1] how.p.e) (rsh [0 1] how.q.e))
+                   ==
+                 [%name del.p.e (rsh [0 1] how.q.e)]
+               e
+           ==
     %name  ?@  how.e  (unq del.e how.e)
            [9 ['\'' arm.how.e] (unq del.e rec.how.e)]
     %frag  ?:  ?=([%name %0 @] of.e)  ::  small opt for frag of leg
