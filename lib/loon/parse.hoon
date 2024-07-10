@@ -49,6 +49,21 @@
     ^-  uexp
     ?:  |(bug ?=(~ loc))  u
     [%spot loc u]
+  ++  parse-list
+    |*  b=mold
+    =|  out=(list b)
+    |=  [parse=$-(lexp (parm b)) src=(list lexp)]
+    ^-  (parm (list b))
+    ?~  src  &+(flop out)
+    %+  bach  (parse i.src)  |=  p=b
+    ^$(src t.src, out [p out])
+  ++  parse-lest
+    |*  b=mold
+    |=  [parse=$-(lexp (parm b)) src=(lest lexp)]
+    ^-  (parm (lest b))
+    %+  bach  (parse i.src)                 |=  i=b
+    %+  bach  ((parse-list b) parse t.src)  |=  t=(list b)
+    &+[i t]
   ++  parse-tup
     |*  b=mold
     |=  $:  cons=$-([b b] b)
@@ -61,6 +76,33 @@
     ?~  t.tup  (parse i.tup)
     ::  or, if there are more, we will parse them as if they had []
     ((parse-sqar b) cons parse tup)
+  ++  parse-cases
+    |*  h=mold
+    |=  [parse=$-(lexp (parm h)) l=(list lexp)]
+    =|  out=(list [h uexp])
+    |-  ^-  (parm [(lest [h uexp]) (unit uexp)])
+    =*  loop  $
+    ?~  l  =/  tou  (flop out)
+           ?~  tou  (die %none)
+           &+[tou ~]
+    =.  tac  [case+loc.i.l tac]
+    ?.  ?=([* %rond * * ~] i.l)  (die ~)
+    =*  ele  l.exp.i.l
+    ?.  ?=([[* %symb *] * ~] ele)
+      %+  bach  (parse &1.ele)       |=  hed=h
+      %+  bach  (parse-uexp &2.ele)  |=  bod=uexp
+      loop(l t.l, out [[hed bod] out])
+    ?.  ?=(%$ s.exp.i.ele)  (die ~)
+    ?^  t.l  (die %else)
+    =/  tou  (flop out)
+    ?~  tou  (die %none)
+    %+  bach  (parse-uexp &2.ele)  |=  bod=uexp
+    &+[tou `bod]
+  ++  parse-case
+    |=  e=lexp
+    ^-  (parm *)
+    ?.  |(?=(@ exp.e) ?=(%cord -.exp.e))  (die ~)
+    [%& ?@(exp.e exp.e +.exp.e)]
   ++  parse-tram
     |=  e=lexp
     ^-  (parm tram)
@@ -125,16 +167,8 @@
     |=  e=lexp
     =.  tac   [book+loc.e tac]
     ?.  ?=([* %rond *] e)  (die ~)
-    =/  l=(list lexp)  l.exp.e
-    %+  bach
-      |-  ^-  (parm (list page))
-      ?~  l  &+~
-      %+  bach  (parse-page i.l)  |=  i=page
-      %+  bach  ^$(l t.l)         |=  t=(list page)
-      &+[i t]
-    |=  t=(list page)
-    ?~  t  (die %none)
-    &+t
+    ?~  l.exp.e  (die %none)
+    ((parse-lest page) parse-page l.exp.e)
   ++  parse-uexp  
     |=  e=lexp
     ^-  (parm uexp)
@@ -193,40 +227,24 @@
           %+  b  r(e &2.args)  |=  b=uexp
           &+same+a^b
             %if
-          =.  tac  [cond+loc.e tac]
+          =.  tac  [if+loc.e tac]
           ?.  ?=([* * * ~] args)  (die ~)
           %+  b  r(e &1.args)  |=  t=uexp
           %+  b  r(e &2.args)  |=  y=uexp
           %+  b  r(e &3.args)  |=  n=uexp
-          &+cond+t^(tops loc.i.&2.args y)^(tops loc.i.&3.args n)
+          &+if+t^(tops loc.i.&2.args y)^(tops loc.i.&3.args n)
+            %cond
+          =.  tac  [cond+loc.e tac]
+          %+  b  ((parse-cases uexp) parse-uexp args)
+          |=  [col=cole els=(unit uexp)]
+          &+cond+col^els
             %case
           =.  tac  [case+loc.e tac]
           ?.  ?=([[* %symb *] *] args)  (die ~)
           =*  foc  s.exp.i.args
-          =/  l  t.args
-          =|  out=(list [val=* bod=uexp])
-          |-  ^-  (parm uexp)
-          ?~  l  =/  tou  (flop out)
-                 ?~  tou  (die %none)
-                 &+[%case foc tou ~]
-          =.  tac  [case+loc.i.l tac]
-          ?.  ?=([* %rond * * ~] i.l)  (die ~)
-          =*  el  l.exp.i.l
-          %+  b  r(e &2.el)  |=  bod=uexp
-          =.  bod  (tops loc.i.&2.el bod)
-          ?:  ?=([[* %symb *] *] el)
-            ?^  t.l  (die %else)  ::  else must be at the end
-            ?.  ?=(%$ s.exp.i.el)  (die ~)
-            =/  tou  (flop out)
-            ?~  tou  (die %none)
-            &+[%case foc tou `bod]
-          =*  ex  exp.i.el
-          ?.  ?|  ?=(@ ex)
-                  ?=(%cord -.ex)
-              ==
-            (die ~)
-          =/  val=*  ?@(ex ex +.ex)
-          ^$(l t.l, out [[val bod] out])
+          %+  b  ((parse-cases *) parse-case t.args)
+          |=  [doz=doze els=(unit uexp)]
+          &+case+foc^doz^els
             %with
           =.  tac  [with+loc.e tac]
           ?.  ?=([* * * ~] args)  (die ~)
@@ -281,7 +299,7 @@
           %+  b  r(e &1.args)          |=  fol=uexp
           %+  b  (parse-args +.args)   |=  arg=uexp
           &+(tops loc.e nock+fol^arg)
-            %line
+            %'~'
           =.  tac  [line+loc.e tac]
           ?.  ?=([[* %symb *] *] args)  (die ~)
           %+  b  (parse-args +.args)  |=  arg=uexp

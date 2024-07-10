@@ -65,6 +65,20 @@
   ++  die
     |=  cud=crud
     [%| tac cud]
+  ++  cond  ::  helper for cond and case
+    |=  [kul=(list [t=kern y=uexp]) els=(unit uexp)]
+    ^-  (coma kern)
+    =.  kul  (flop kul)
+    ?~  kul  !!
+    =*  r  $
+    =*  t  t.i.kul
+    %+  bach  (mint y.i.kul)  |=  y=kern
+    ?~  t.kul
+      ?~  els  &+cond+t^y^[%name 0 0]
+      %+  bach  (mint u.els)  |=  n=kern
+      &+cond+t^y^n
+    %+  bach  r(kul t.kul)  |=  n=kern
+    &+cond+t^y^n
   ++  mint
     |=  e=uexp  
     ^-  (coma kern)
@@ -94,23 +108,28 @@
       %same  %+  b  r(e a.e)  |=  a=kern
              %+  b  r(e b.e)  |=  b=kern
              &+same+a^b
-      %cond  %+  b  r(e t.e)  |=  t=kern
+      %if    %+  b  r(e t.e)  |=  t=kern
              %+  b  r(e y.e)  |=  y=kern
              %+  b  r(e n.e)  |=  n=kern
              &+cond+t^y^n
+      %cond  =/  l  col.e
+             =|  out=(list [kern uexp])
+             |-  ^-  (coma kern)
+             %+  b  r(e t.i.l)  |=  t=kern
+             =.  out  [[t y.i.l] out]
+             ?^  t.l  ^$(l t.l)
+             (cond out els.e)
       %case  =/  p=path  (find of.e)
              ?~  p  (die %find of.e)
              ?:  ?=(%arm +<.p)  (die %carm of.e)
+             =/  n  [%name del.p leg.f.p]
              =/  l  do.e
+             =|  out=(list [kern uexp])
              |-  ^-  (coma kern)
-             =/  sam  [%same [%litn val.i.l] %name del.p leg.f.p]
-             %+  b  r(e bod.i.l)  |=  hed=kern
-             ?~  t.l
-               ?~  els.e  &+cond+sam^hed^[%name 0 0]
-               %+  b  r(e u.els.e)  |=  els=kern
-               &+cond+sam^hed^els
-             %+  b  ^$(l t.l)     |=  tal=kern
-             &+cond+sam^hed^tal
+             =.  out  :_   out  :_  bod.i.l
+               [%same [%litn val.i.l] n]
+             ?^  t.l  $(l t.l)
+             (cond out els.e)
       %with  %+  b  r(e val.e)  |=  val=kern
              %+  b  r(e do.e, i.ctx (lift nam.e))
              |=  do=kern  &+with+val^do

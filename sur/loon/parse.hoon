@@ -14,6 +14,7 @@
   [~ s=sent]
 +$  book  (lest page)          ::  sequential bindings
 +$  doze  (lest [val=* bod=uexp])  ::  cases
++$  cole  (lest [t=uexp y=uexp])   ::  cond lines
 +$  uexp
   $~  %a
   $@  @t  :: variable
@@ -26,7 +27,8 @@
       [%bump atm=uexp]
       [%deep val=uexp]
       [%same a=uexp b=uexp]
-      [%cond t=uexp y=uexp n=uexp]
+      [%if t=uexp y=uexp n=uexp]
+      [%cond col=cole els=(unit uexp)]
       [%case of=@t do=doze els=(unit uexp)]
       [%with nam=tram val=uexp do=uexp]
       [%letn p=page in=uexp]

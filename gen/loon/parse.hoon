@@ -22,7 +22,7 @@
       :+  "bump"    bump+litn+42      "(+ 42)"
       :+  "deep"    deep+%a           "(? a)"
       :+  "same"    [%same %a %b]     "(= a b)"
-      :+  "if"      [%cond %a %b %c]  "(if a b c)"
+      :+  "if"      [%if %a %b %c]    "(if a b c)"
       :+  "with"    [%with [%$ %b] [%frag 3 %c] %b]
       "(with [_ b] (/ 3 c) b)"
       :+  "letn"
@@ -38,7 +38,7 @@
       :+  "fn"  [%lamb %$ %a %a]  "(fn a a)"
       :+  "rfn"
         :*  %lamb  %loop  %i
-            %cond  [%same %i litn+4]
+            %if    [%same %i litn+4]
             cord+'done'
             [%appl %loop %bump %i]
         ==
