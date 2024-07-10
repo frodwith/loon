@@ -98,6 +98,19 @@
              %+  b  r(e y.e)  |=  y=kern
              %+  b  r(e n.e)  |=  n=kern
              &+cond+t^y^n
+      %case  =/  p=path  (find of.e)
+             ?~  p  (die %find of.e)
+             ?:  ?=(%arm +<.p)  (die %carm of.e)
+             =/  l  do.e
+             |-  ^-  (coma kern)
+             =/  sam  [%same [%litn val.i.l] %name del.p leg.f.p]
+             %+  b  r(e bod.i.l)  |=  hed=kern
+             ?~  t.l
+               ?~  els.e  &+cond+sam^hed^[%name 0 0]
+               %+  b  r(e u.els.e)  |=  els=kern
+               &+cond+sam^hed^els
+             %+  b  ^$(l t.l)     |=  tal=kern
+             &+cond+sam^hed^tal
       %with  %+  b  r(e val.e)  |=  val=kern
              %+  b  r(e do.e, i.ctx (lift nam.e))
              |=  do=kern  &+with+val^do
@@ -225,6 +238,7 @@
     %cab       "cannot use _ as a variable"
     [%find *]  "unbound variable {<nam.c>}"
     [%barm *]  "cannot bind arm {<nam.c>}"
+    [%carm *]  "cannot case scrutinize arm {<nam.c>}"
     [%line *]  ?~  p.c  "inline unbound variable {<nam.c>}"
                "cannot inline arm {<nam.c>}"
   ==

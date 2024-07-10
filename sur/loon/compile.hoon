@@ -44,6 +44,7 @@
   $@  ?(%cab %top-line)
   $%  [%find nam=@t]
       [%barm nam=@t]
+      [%carm nam=@t]
       [%line nam=@t p=path]
   ==
 +$  compile-err  [tac=trac cud=crud]

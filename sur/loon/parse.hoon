@@ -13,6 +13,7 @@
   $^  [p=page q=page]
   [~ s=sent]
 +$  book  (lest page)          ::  sequential bindings
++$  doze  (lest [val=* bod=uexp])  ::  cases
 +$  uexp
   $~  %a
   $@  @t  :: variable
@@ -26,6 +27,7 @@
       [%deep val=uexp]
       [%same a=uexp b=uexp]
       [%cond t=uexp y=uexp n=uexp]
+      [%case of=@t do=doze els=(unit uexp)]
       [%with nam=tram val=uexp do=uexp]
       [%letn p=page in=uexp]
       [%lets b=book in=uexp]
@@ -43,7 +45,7 @@
       [%dint tag=@ clu=uexp exp=uexp]
   ==
 +$  trak  (list [mot=@tas loc=spam])
-+$  desc  ?(~ %none %many %alias)
++$  desc  ?(~ %none %many %alias %else)
 +$  parse-err  [des=desc tac=trak]
 +$  parse-tape-err  (each read-tape-err parse-err)
 ++  parm  |*(a=mold (each a parse-err))  :: parsing monad

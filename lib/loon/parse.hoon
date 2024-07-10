@@ -198,7 +198,35 @@
           %+  b  r(e &1.args)  |=  t=uexp
           %+  b  r(e &2.args)  |=  y=uexp
           %+  b  r(e &3.args)  |=  n=uexp
-          &+cond+t^y^n
+          &+cond+t^(tops loc.i.&2.args y)^(tops loc.i.&3.args n)
+            %case
+          =.  tac  [case+loc.e tac]
+          ?.  ?=([[* %symb *] *] args)  (die ~)
+          =*  foc  s.exp.i.args
+          =/  l  t.args
+          =|  out=(list [val=* bod=uexp])
+          |-  ^-  (parm uexp)
+          ?~  l  =/  tou  (flop out)
+                 ?~  tou  (die %none)
+                 &+[%case foc tou ~]
+          =.  tac  [case+loc.i.l tac]
+          ?.  ?=([* %rond * * ~] i.l)  (die ~)
+          =*  el  l.exp.i.l
+          %+  b  r(e &2.el)  |=  bod=uexp
+          =.  bod  (tops loc.i.&2.el bod)
+          ?:  ?=([[* %symb *] *] el)
+            ?^  t.l  (die %else)  ::  else must be at the end
+            ?.  ?=(%$ s.exp.i.el)  (die ~)
+            =/  tou  (flop out)
+            ?~  tou  (die %none)
+            &+[%case foc tou `bod]
+          =*  ex  exp.i.el
+          ?.  ?|  ?=(@ ex)
+                  ?=(%cord -.ex)
+              ==
+            (die ~)
+          =/  val=*  ?@(ex ex +.ex)
+          ^$(l t.l, out [[val bod] out])
             %with
           =.  tac  [with+loc.e tac]
           ?.  ?=([* * * ~] args)  (die ~)
