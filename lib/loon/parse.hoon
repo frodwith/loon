@@ -9,18 +9,6 @@
   |*  [a=(each) f=$-(* (each))]
   ?.  ?=(%& -.a)  a
   (f p.a)
-::  apply a parse-errable function f to every lexp in a lest,
-::  consing results with k (pattern when parsing lists to tuples)
-++  tuplify
-  |*  [l=(lest lexp) k=$-(^ *) f=$-(lexp (parm))]
-  |-
-  =/  one   (f i.l)
-  ^+  one
-  ?~  t.l   one
-  =*  b  _?~(-.one p.one !!)
-  %+  bach  one        |=  hed=b
-  %+  bach  ^$(l t.l)  |=  tal=b
-  &+(k hed tal)
 ++  june
   |=  [a=uexp b=uexp]
   ^-  uexp
@@ -32,9 +20,13 @@
           i=lexp
           t=(lest lexp)
       ==
-  %+  bach  (parse i)               |=  hed=b
-  %+  bach  (tuplify t cons parse)  |=  tal=b
-  &+(cons hed tal)
+  ^-  (parm b)
+  %+  bach  (parse i)    |=  one=b
+  |-  ^-  (parm b)
+  %+  bach  (parse i.t)  |=  hed=b
+  ?~  t.t  &+(cons one hed)
+  %+  bach  ^$(t t.t)    |=  tal=b
+  &+(cons one (cons hed tal))
 ++  pe
   ::  bug=& means exclude spot hints
   =|  tac=trak
@@ -98,11 +90,17 @@
     ?~  tou  (die %none)
     %+  bach  (parse-uexp &2.ele)  |=  bod=uexp
     &+[tou `bod]
-  ++  parse-case
+  ++  parse-lit
     |=  e=lexp
+    =.  tac  [lit+loc.e tac]
     ^-  (parm *)
-    ?.  |(?=(@ exp.e) ?=(%cord -.exp.e))  (die ~)
-    [%& ?@(exp.e exp.e +.exp.e)]
+    =*  x  exp.e
+    ?+  x  (die ~)
+      @          &+x
+      [%tape *]  &+t.x
+      [%cord *]  &+c.x
+      [%sqar *]  ((parse-sqar *) |=(^ +<) ..$ +.x)
+    ==
   ++  parse-tram
     |=  e=lexp
     ^-  (parm tram)
@@ -242,7 +240,7 @@
           =.  tac  [case+loc.e tac]
           ?.  ?=([[* %symb *] *] args)  (die ~)
           =*  foc  s.exp.i.args
-          %+  b  ((parse-cases *) parse-case t.args)
+          %+  b  ((parse-cases *) parse-lit t.args)
           |=  [doz=doze els=(unit uexp)]
           &+case+foc^doz^els
             %with
